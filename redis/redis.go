@@ -26,6 +26,7 @@ func NewRedis() *RedisUtil {
 }
 
 func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
+	// TODO red lock
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	key := fmt.Sprintf(ParsingKey, articleName, author)
