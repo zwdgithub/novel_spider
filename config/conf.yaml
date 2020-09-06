@@ -1,0 +1,6 @@
+addr: localhost
+dbname: book
+port: 3306
+user: root
+pass: root
+encoding: utf8
