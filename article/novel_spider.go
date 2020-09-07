@@ -65,7 +65,7 @@ func (s *NovelSpider) Process(url string, c chan int) {
 		}
 	}()
 
-	content, err := util.Get(url, s.wsInfo.Headers, s.wsInfo.Encoding)
+	content, err := util.Get(url, s.wsInfo.Encoding, s.wsInfo.Headers)
 	if err != nil {
 		return
 	}

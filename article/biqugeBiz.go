@@ -59,7 +59,7 @@ func (n *BiqugeBiz) ChapterList(content string) ([]string, []string) {
 }
 
 func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
-	content, err := util.Get(url, n.Headers, n.Encoding)
+	content, err := util.Get(url, n.Encoding, n.Headers)
 	if err != nil {
 		return "", err
 	}

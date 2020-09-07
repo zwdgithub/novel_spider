@@ -9,13 +9,26 @@ import (
 	"net/http"
 )
 
+type Headers map[string]string
+
 func defaultCustomProxy(client *http.Client) *http.Client {
 	client.Transport = &http.Transport{}
+	return client
 }
 
-func Get(url, encoding string, headers map[string]string) (string, error) {
+func Get(url, encoding string, p ...interface{}) (string, error) {
 	h := xhttp.NewHttpUtil()
-	h.Get(url).SetHeader(headers).CustomClient(defaultCustomProxy).Do()
+	h.Get(url)
+
+	for _, item := range p {
+		switch v := item.(type) {
+		case Headers:
+			h.SetHeader(v)
+		case func(c *http.Client) *http.Client:
+			h.CustomClient(v)
+		}
+	}
+	h.Do()
 
 	if h.Error() != nil {
 		return "", h.Error()
