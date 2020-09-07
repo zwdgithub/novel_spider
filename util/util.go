@@ -6,11 +6,16 @@ import (
 	"golang.org/x/text/transform"
 	"io"
 	"io/ioutil"
+	"net/http"
 )
 
-func Get(url string, headers map[string]string, encoding string) (string, error) {
+func defaultCustomProxy(client *http.Client) *http.Client {
+	client.Transport = &http.Transport{}
+}
+
+func Get(url, encoding string, headers map[string]string) (string, error) {
 	h := xhttp.NewHttpUtil()
-	h.Get(url).SetHeader(headers).Do()
+	h.Get(url).SetHeader(headers).CustomClient(defaultCustomProxy).Do()
 
 	if h.Error() != nil {
 		return "", h.Error()

@@ -5,13 +5,18 @@ import (
 	"gotest/model"
 	"gotest/redis"
 	"gotest/util"
+	"time"
 )
+
+var ()
 
 type NovelWebsites interface {
 	ArticleInfo(content string) (*Article, error)
 	LocalArticleInfo(articleName, author string) (*model.JieqiArticle, error)
 	ChapterList(content string) ([]string, []string)
 	ChapterContent(chapterUrl string) (string, error)
+	Consumer() (string, error)
+	NewList()
 }
 
 type NovelSpider struct {
@@ -30,11 +35,36 @@ func NewNovelSpider(ws NovelWebsites, wsInfo *NovelWebsite, service *db.ArticleS
 	}
 }
 
-func (s *NovelSpider) isParsing(articleName, author string) {
-
+func (s *NovelSpider) CanParse(articleName, author string) (bool, error) {
+	return s.redis.CanParse(articleName, author)
 }
 
-func (s *NovelSpider) Process(url string) {
+func (s *NovelSpider) ParseEnd(articleName, author string) {
+	s.redis.ParseEnd(articleName, author)
+}
+
+func (s *NovelSpider) Consumer() {
+	c := make(chan int, s.wsInfo.Concurrent)
+	for {
+		if len(c) < s.wsInfo.Concurrent {
+			url, err := s.ws.Consumer()
+			if err != nil {
+				time.Sleep(time.Second * 5)
+			}
+			c <- 1
+			go s.Process(url, c)
+		}
+		time.Sleep(time.Second / 2)
+	}
+}
+
+func (s *NovelSpider) Process(url string, c chan int) {
+	defer func() {
+		<-c
+		if err := recover(); err != nil {
+		}
+	}()
+
 	content, err := util.Get(url, s.wsInfo.Headers, s.wsInfo.Encoding)
 	if err != nil {
 		return
@@ -43,11 +73,11 @@ func (s *NovelSpider) Process(url string) {
 	if err != nil || article == nil || article.ArticleName == "" || article.Author == "" {
 		return
 	}
-	canParse, err := s.redis.CanParse(article.ArticleName, article.Author)
+	canParse, err := s.CanParse(article.ArticleName, article.Author)
 	if err != nil || !canParse {
 		return
 	}
-	defer s.redis.ParseEnd(article.ArticleName, article.Author)
+	defer s.ParseEnd(article.ArticleName, article.Author)
 
 	local, err := s.ws.LocalArticleInfo(article.ArticleName, article.Author)
 	if err != nil {
@@ -62,6 +92,7 @@ func (s *NovelSpider) Process(url string) {
 		if err != nil {
 			return
 		}
+		local = newArticle
 	}
 
 	urls, names := s.ws.ChapterList(content)
@@ -83,6 +114,9 @@ func (s *NovelSpider) Process(url string) {
 			}
 			chapter := &model.JieqiChapter{
 				Chapterorder: order + 1,
+				Chaptername:  name,
+				Articleid:    local.Articleid,
+				Articlename:  local.Articlename,
 			}
 			chapter, err = s.service.AddChapter(chapter, content)
 			if err != nil {

@@ -15,7 +15,6 @@ func main() {
 	service := db.NewArticleService(dbConn)
 	website := article.NewBiqugeBiz(service, bosClient)
 	spider := article.NewNovelSpider(website, website.NovelWebsite, service, redisConn)
-	spider.Process("https://www.biquge.biz/22_22780/")
-	//fmt.Print(website.ParseArticleInfo("https://www.biquge.biz/22_22780/", false))
+	spider.Process("https://www.biquge.biz/39_39082/", nil)
 
 }

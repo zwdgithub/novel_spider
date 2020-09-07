@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/go-redis/redis"
 	"sync"
-	"time"
 )
 
 const (
@@ -22,7 +21,7 @@ func NewRedis() *RedisUtil {
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-	return &RedisUtil{conn: conn}
+	return &RedisUtil{conn: conn, lock: new(sync.Mutex)}
 }
 
 func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
@@ -30,14 +29,13 @@ func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	key := fmt.Sprintf(ParsingKey, articleName, author)
-	v, err := r.conn.Get(key).Result()
+	v, err := r.conn.Incr(key).Result()
 	if err != nil {
 		return false, err
 	}
-	if v == "1" {
+	if v > 1 {
 		return false, err
 	}
-	r.conn.Set(key, "1", time.Minute*60)
 	return true, nil
 }
 

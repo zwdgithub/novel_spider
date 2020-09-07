@@ -3,6 +3,8 @@ package article
 import (
 	"errors"
 	"fmt"
+	xhttp "github.com/zwdgithub/simple_http"
+	"net/http"
 	"regexp"
 	"strings"
 )
@@ -28,4 +30,12 @@ func ParseArticleInfo(content string) (*Article, error) {
 	}
 	fmt.Println(info)
 	return &info, nil
+}
+
+func Get(url string, customClient func(client *http.Client) *http.Client) (string, error) {
+	h := xhttp.NewHttpUtil().Get(url)
+	if customClient == nil {
+		return h.RContent()
+	}
+	return h.CustomClient(customClient).RContent()
 }
