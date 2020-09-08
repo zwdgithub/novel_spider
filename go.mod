@@ -1,4 +1,4 @@
-module gotest
+module novel_spider
 
 go 1.12
 

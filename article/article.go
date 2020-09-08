@@ -11,16 +11,17 @@ import (
 )
 
 type NovelWebsite struct {
-	Name       string                 // 网站中文名
-	Host       string                 // 域名 qidian.com
-	Encoding   string                 // utf-8 gbk gb18030
-	Headers    map[string]string      // header
-	Cookie     http.CookieJar         // cookie
-	Category   map[string]interface{} // 分类
-	IProxy     *IProxy
-	HasChapter bool
-	BosClient  *bos.Client
-	Concurrent int
+	Name         string                 // 网站中文名
+	Host         string                 // 域名 qidian.com
+	Encoding     string                 // utf-8 gbk gb18030
+	Headers      map[string]string      // header
+	Cookie       http.CookieJar         // cookie
+	Category     map[string]interface{} // 分类
+	IProxy       *IProxy
+	HasChapter   bool
+	BosClient    *bos.Client
+	Concurrent   int
+	ShortContent int
 }
 
 type Article struct {

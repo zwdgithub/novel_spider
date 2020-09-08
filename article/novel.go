@@ -1,6 +1,6 @@
 package article
 
-import "gotest/model"
+import "novel_spider/model"
 
 type Novel interface {
 	NewSpider()

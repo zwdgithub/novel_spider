@@ -1,10 +1,10 @@
 package main
 
 import (
-	"gotest/article"
-	"gotest/bos_utils"
-	"gotest/db"
-	"gotest/redis"
+	"novel_spider/article"
+	"novel_spider/bos_utils"
+	"novel_spider/db"
+	"novel_spider/redis"
 )
 
 func main() {
@@ -15,6 +15,5 @@ func main() {
 	service := db.NewArticleService(dbConn)
 	website := article.NewBiqugeBiz(service, bosClient)
 	spider := article.NewNovelSpider(website, website.NovelWebsite, service, redisConn)
-	spider.Process("https://www.biquge.biz/39_39082/", nil)
-
+	spider.Consumer()
 }

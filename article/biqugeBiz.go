@@ -1,12 +1,14 @@
 package article
 
 import (
+	"errors"
 	"fmt"
 	"github.com/baidubce/bce-sdk-go/services/bos"
-	"gotest/db"
-	"gotest/model"
-	"gotest/util"
+	"novel_spider/db"
+	"novel_spider/model"
+	"novel_spider/util"
 	"regexp"
+	"strings"
 )
 
 type BiqugeBiz struct {
@@ -63,15 +65,25 @@ func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	reg := regexp.MustCompile(``)
-	s := reg.FindAllString(content, -1)
-	return s[0], err
+	reg := regexp.MustCompile(`<div id="content">(.+?)</div>`)
+	c := reg.FindStringSubmatch(content)
+	if len(c) <= 1 {
+		return "", errors.New(fmt.Sprintf("chapter content regex error, err:%v, url: %s", err, url))
+	}
+	c[1] = strings.ReplaceAll(c[1], "&nbsp;", "")
+	c[1] = strings.ReplaceAll(c[1], "<br>", "\r\n")
+	c[1] = strings.ReplaceAll(c[1], "<br/>", "\r\n")
+	c[1] = strings.ReplaceAll(c[1], "<br >", "\r\n")
+	if len(c[1]) < n.ShortContent {
+		return "", errors.New(fmt.Sprintf("short content, url: %s", url))
+	}
+	return c[1], err
 }
 
 func (n *BiqugeBiz) Consumer() (string, error) {
 	return "", nil
 }
 
-func (n *BiqugeBiz) NewList() {
+func (n *BiqugeBiz) NewList() ([]string, error) {
 
 }

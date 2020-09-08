@@ -1,13 +1,16 @@
 package redis
 
 import (
+	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
 	"sync"
+	"time"
 )
 
 const (
-	ParsingKey = "parsing|%s|%s"
+	ParsingKey       = "parsing|%s|%s"
+	NeedParseListKey = "need_parse_list_%s"
 )
 
 type RedisUtil struct {
@@ -22,6 +25,11 @@ func NewRedis() *RedisUtil {
 		DB:       0,  // use default DB
 	})
 	return &RedisUtil{conn: conn, lock: new(sync.Mutex)}
+}
+
+func (r *RedisUtil) Pause() bool {
+	v, _ := r.conn.Get("novel_spider_pause").Result()
+	return v == "1"
 }
 
 func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
@@ -44,4 +52,28 @@ func (r *RedisUtil) ParseEnd(articleName, author string) {
 	defer r.lock.Unlock()
 	key := fmt.Sprintf(ParsingKey, articleName, author)
 	r.conn.Del(key)
+}
+
+func (r *RedisUtil) PutUrlToQueue(website, url string) {
+	key := fmt.Sprintf(NeedParseListKey, website)
+	v, err := r.conn.SAdd(key+"_set", url).Result()
+	if err != nil {
+		return
+	}
+	if v == 1 {
+		r.conn.LPush(url)
+	}
+}
+
+func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
+	key := fmt.Sprintf(NeedParseListKey, website)
+	v, err := r.conn.BRPop(time.Second*2, key).Result()
+	if err != nil {
+		return "", err
+	}
+	if len(v) <= 0 {
+		return "", errors.New("do not have some url to parse")
+	}
+	r.conn.SRem(key+"_set", v[0])
+	return v[0], nil
 }

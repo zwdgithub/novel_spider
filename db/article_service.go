@@ -2,8 +2,8 @@ package db
 
 import (
 	"github.com/jinzhu/gorm"
-	"gotest/bos_utils"
-	"gotest/model"
+	"novel_spider/bos_utils"
+	"novel_spider/model"
 	"time"
 )
 
@@ -47,7 +47,7 @@ func (service *ArticleService) AddChapter(chapter *model.JieqiChapter, content s
 
 	err = service.bos.PutChapter(chapter.Articleid, chapter.Chapterid, content)
 	if err != nil {
-		service.db.Unscoped().Where("chapterid = ?", chapter.Chapterid).Delete()
+		service.db.Unscoped().Where("chapterid = ?", chapter.Chapterid).Delete(&chapter)
 		return nil, err
 	}
 	article := &model.JieqiArticle{

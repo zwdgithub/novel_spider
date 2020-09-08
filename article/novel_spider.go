@@ -1,10 +1,10 @@
 package article
 
 import (
-	"gotest/db"
-	"gotest/model"
-	"gotest/redis"
-	"gotest/util"
+	"novel_spider/db"
+	"novel_spider/model"
+	"novel_spider/redis"
+	"novel_spider/util"
 	"time"
 )
 
@@ -16,7 +16,7 @@ type NovelWebsites interface {
 	ChapterList(content string) ([]string, []string)
 	ChapterContent(chapterUrl string) (string, error)
 	Consumer() (string, error)
-	NewList()
+	NewList() ([]string, error)
 }
 
 type NovelSpider struct {
@@ -24,6 +24,11 @@ type NovelSpider struct {
 	wsInfo  *NovelWebsite
 	service *db.ArticleService
 	redis   *redis.RedisUtil
+}
+
+type NewArticle struct {
+	Url            string
+	NewChapterName string
 }
 
 func NewNovelSpider(ws NovelWebsites, wsInfo *NovelWebsite, service *db.ArticleService, redis *redis.RedisUtil) *NovelSpider {
@@ -46,26 +51,32 @@ func (s *NovelSpider) ParseEnd(articleName, author string) {
 func (s *NovelSpider) Consumer() {
 	c := make(chan int, s.wsInfo.Concurrent)
 	for {
+		if s.redis.Pause() {
+			return
+		}
 		if len(c) < s.wsInfo.Concurrent {
 			url, err := s.ws.Consumer()
 			if err != nil {
 				time.Sleep(time.Second * 5)
 			}
 			c <- 1
-			go s.Process(url, c)
+			go s.Process(NewArticle{
+				Url:            url,
+				NewChapterName: "",
+			}, c)
 		}
 		time.Sleep(time.Second / 2)
 	}
 }
 
-func (s *NovelSpider) Process(url string, c chan int) {
+func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	defer func() {
 		<-c
 		if err := recover(); err != nil {
 		}
 	}()
 
-	content, err := util.Get(url, s.wsInfo.Encoding, s.wsInfo.Headers)
+	content, err := util.Get(obj.Url, s.wsInfo.Encoding, s.wsInfo.Headers)
 	if err != nil {
 		return
 	}
@@ -107,6 +118,9 @@ func (s *NovelSpider) Process(url string, c chan int) {
 	}
 
 	for i, name := range names {
+		if s.redis.Pause() {
+			return
+		}
 		if start {
 			content, err := s.ws.ChapterContent(urls[i])
 			if err != nil {
@@ -129,5 +143,19 @@ func (s *NovelSpider) Process(url string, c chan int) {
 		if name == local.Lastchapter {
 			start = true
 		}
+	}
+
+	if len(names) > 0 && obj.NewChapterName != "" && names[len(names)-1] != obj.NewChapterName {
+		s.redis.PutUrlToQueue(s.wsInfo.Host, obj.Url)
+	}
+}
+
+func (s *NovelSpider) NewList() {
+	list, err := s.ws.NewList()
+	if err != nil {
+		return
+	}
+	for _, u := range list {
+		s.redis.PutUrlToQueue(s.wsInfo.Host, u)
 	}
 }
