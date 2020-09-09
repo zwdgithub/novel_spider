@@ -12,8 +12,8 @@ func main() {
 	bosClient := bos_utils.NewBosClient()
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
-	service := db.NewArticleService(dbConn)
-	website := article.NewBiqugeBiz(service, bosClient)
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	website := article.NewBiqugeBiz(service)
 	spider := article.NewNovelSpider(website, website.NovelWebsite, service, redisConn)
 	spider.Consumer()
 }
