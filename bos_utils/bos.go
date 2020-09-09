@@ -5,6 +5,7 @@ import (
 	"github.com/axgle/mahonia"
 	"github.com/baidubce/bce-sdk-go/services/bos"
 	"github.com/baidubce/bce-sdk-go/util/log"
+	xhttp "github.com/zwdgithub/simple_http"
 	"io/ioutil"
 )
 
@@ -41,6 +42,22 @@ func (b *BosUtil) PutChapter(aid, cid int, content string) error {
 }
 
 func (b *BosUtil) PutCover(aid int) error {
+	h := xhttp.NewHttpUtil()
+	h.Get("https://www.ihxs.la/files/article/image/69/69938/69938s.jpg").Do()
+	if h.Error() != nil {
+		return h.Error()
+	}
+	resp := h.Response()
+	defer resp.Body.Close()
+	bb, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	r, err := b.bos.PutObjectFromBytes(b.bucket, "6.jpg", bb, nil)
+	fmt.Println(r)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
