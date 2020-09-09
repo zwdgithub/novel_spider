@@ -3,6 +3,7 @@ module novel_spider
 go 1.12
 
 require (
+	github.com/PuerkitoBio/goquery v1.5.1
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/baidubce/bce-sdk-go v0.9.15
 	github.com/go-redis/redis v6.15.9+incompatible

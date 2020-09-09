@@ -3,11 +3,11 @@ package article
 import (
 	"errors"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"novel_spider/db"
 	"novel_spider/util"
 	"regexp"
 	"strings"
-	"time"
 )
 
 type BiqugeBiz struct {
@@ -77,8 +77,15 @@ func (n *BiqugeBiz) Consumer() (string, error) {
 }
 
 func (n *BiqugeBiz) NewList() ([]string, error) {
-	for {
-		fmt.Println("new _url ")
-		time.Sleep(time.Second * 1)
+	r := make([]string, 0)
+	content, err := util.Get("https://www.biquge.biz/", n.Encoding, n.Headers)
+	if err != nil {
+		return r, err
 	}
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(content))
+	if err != nil {
+		return r, err
+	}
+	doc.Find(".")
+	return r, nil
 }
