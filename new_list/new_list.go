@@ -15,4 +15,5 @@ func main() {
 	service := db.NewArticleService(dbConn)
 	website := article.NewBiqugeBiz(service, bosClient)
 	spider := article.NewNovelSpider(website, website.NovelWebsite, service, redisConn)
+	spider.NewList()
 }

@@ -49,9 +49,9 @@ func New(conf *MysqlConfig) *gorm.DB {
 	db.LogMode(true)
 	db.SingularTable(true)
 	// 空闲时最大连接数
-	db.DB().SetMaxIdleConns(100)
+	db.DB().SetMaxIdleConns(10)
 	// 最大连接数
-	db.DB().SetMaxOpenConns(500)
+	db.DB().SetMaxOpenConns(100)
 	db.DB().SetConnMaxLifetime(60 * time.Second)
 	return db
 }

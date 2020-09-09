@@ -4,11 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"github.com/baidubce/bce-sdk-go/services/bos"
+	"novel_spider/bos_utils"
 	"novel_spider/db"
 	"novel_spider/model"
 	"novel_spider/util"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type BiqugeBiz struct {
@@ -17,7 +19,7 @@ type BiqugeBiz struct {
 	concurrent int
 }
 
-func NewBiqugeBiz(service *db.ArticleService, bosClient *bos.Client) *BiqugeBiz {
+func NewBiqugeBiz(service *db.ArticleService, bosClient *bos_utils.BosUtil) *BiqugeBiz {
 	c := &BiqugeBiz{
 		NovelWebsite: &NovelWebsite{
 			Name:       "biquge.biz",
@@ -26,7 +28,7 @@ func NewBiqugeBiz(service *db.ArticleService, bosClient *bos.Client) *BiqugeBiz 
 			Headers:    nil,
 			Cookie:     nil,
 			IProxy:     nil,
-			BosClient:  bosClient,
+			BosUtil:    bosClient,
 			Concurrent: 1,
 		},
 		service: service,
@@ -44,20 +46,20 @@ func (n *BiqugeBiz) ArticleInfo(content string) (*Article, error) {
 func (n *BiqugeBiz) LocalArticleInfo(articleName, author string) (*model.JieqiArticle, error) {
 	return n.service.LocalArticleInfo(articleName, author)
 }
-func (n *BiqugeBiz) ChapterList(content string) ([]string, []string) {
-	chapterUrl := make([]string, 0)
-	chapterName := make([]string, 0)
-
+func (n *BiqugeBiz) ChapterList(content string) ([]NewChapter, error) {
+	newChapters := make([]NewChapter, 0)
 	reg := regexp.MustCompile(`<dd><a href="(.+?)"  >(.+?)</a></dd>`)
 	chapters := reg.FindAllString(content, -1)
 
 	for _, v := range chapters {
 		c := reg.FindStringSubmatch(v)
 		fmt.Println(c[1], c[2])
-		chapterUrl = append(chapterUrl, c[1])
-		chapterName = append(chapterName, c[2])
+		newChapters = append(newChapters, NewChapter{
+			Url:         c[1],
+			ChapterName: c[2],
+		})
 	}
-	return chapterUrl, chapterName
+	return newChapters, nil
 }
 
 func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
@@ -85,5 +87,8 @@ func (n *BiqugeBiz) Consumer() (string, error) {
 }
 
 func (n *BiqugeBiz) NewList() ([]string, error) {
-
+	for {
+		fmt.Println("new _url ")
+		time.Sleep(time.Second * 1)
+	}
 }

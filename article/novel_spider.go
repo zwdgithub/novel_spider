@@ -1,6 +1,7 @@
 package article
 
 import (
+	"errors"
 	"novel_spider/db"
 	"novel_spider/model"
 	"novel_spider/redis"
@@ -8,12 +9,15 @@ import (
 	"time"
 )
 
-var ()
+var (
+	contentShortError = errors.New("content length too short")
+	chapterNotMatch   = errors.New("no chapter need to update ")
+)
 
 type NovelWebsites interface {
 	ArticleInfo(content string) (*Article, error)
 	LocalArticleInfo(articleName, author string) (*model.JieqiArticle, error)
-	ChapterList(content string) ([]string, []string)
+	ChapterList(content string) ([]NewChapter, error)
 	ChapterContent(chapterUrl string) (string, error)
 	Consumer() (string, error)
 	NewList() ([]string, error)
@@ -29,6 +33,11 @@ type NovelSpider struct {
 type NewArticle struct {
 	Url            string
 	NewChapterName string
+}
+
+type NewChapter struct {
+	Url         string
+	ChapterName string
 }
 
 func NewNovelSpider(ws NovelWebsites, wsInfo *NovelWebsite, service *db.ArticleService, redis *redis.RedisUtil) *NovelSpider {
@@ -51,7 +60,7 @@ func (s *NovelSpider) ParseEnd(articleName, author string) {
 func (s *NovelSpider) Consumer() {
 	c := make(chan int, s.wsInfo.Concurrent)
 	for {
-		if s.redis.Pause() {
+		if s.redis.Pause(s.wsInfo.Host) {
 			return
 		}
 		if len(c) < s.wsInfo.Concurrent {
@@ -100,52 +109,72 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			Author:      article.Author,
 		}
 		err := s.service.AddArticle(newArticle)
+		// TODO download cover
 		if err != nil {
 			return
 		}
 		local = newArticle
 	}
 
-	urls, names := s.ws.ChapterList(content)
-	article.LastChapter = names[len(names)-1]
+	allChapters, err := s.ws.ChapterList(content)
+	if err != nil || len(allChapters) == 0 {
+		return
+	}
+	targetLast := obj.NewChapterName
+	if targetLast == "" {
+		targetLast = allChapters[len(allChapters)-1].ChapterName
+	}
+
+	article.LastChapter = targetLast
 	if article.LastChapter == local.Lastchapter {
 		return
 	}
 
-	start, order := false, local.Chapters
+	order := local.Chapters
+	newChapters := make([]NewChapter, 0)
+	match := false
 	if local.Chapters == 0 {
-		start = true
+		match = true
+	}
+	if !match {
+		for _, item := range allChapters {
+			if item.ChapterName == local.Lastchapter {
+				match = true
+			}
+			if match {
+				newChapters = append(newChapters)
+			}
+		}
+	}
+	if !match {
+		return
+	}
+	if len(newChapters) == 0 {
+		return
 	}
 
-	for i, name := range names {
-		if s.redis.Pause() {
+	for _, item := range newChapters {
+		if s.redis.Pause(s.wsInfo.Host) {
 			return
 		}
-		if start {
-			content, err := s.ws.ChapterContent(urls[i])
-			if err != nil {
-				return
-			}
-			chapter := &model.JieqiChapter{
-				Chapterorder: order + 1,
-				Chaptername:  name,
-				Articleid:    local.Articleid,
-				Articlename:  local.Articlename,
-			}
-			chapter, err = s.service.AddChapter(chapter, content)
-			if err != nil {
-				return
-			}
-			order += 1
-			continue
+		content, err := s.ws.ChapterContent(item.Url)
+		if err != nil {
+			return
 		}
-
-		if name == local.Lastchapter {
-			start = true
+		chapter := &model.JieqiChapter{
+			Chapterorder: order + 1,
+			Chaptername:  item.ChapterName,
+			Articleid:    local.Articleid,
+			Articlename:  local.Articlename,
 		}
+		chapter, err = s.service.AddChapter(chapter, content)
+		if err != nil {
+			return
+		}
+		order += 1
 	}
 
-	if len(names) > 0 && obj.NewChapterName != "" && names[len(names)-1] != obj.NewChapterName {
+	if len(newChapters) > 0 && obj.NewChapterName != "" && newChapters[len(newChapters)-1].ChapterName != obj.NewChapterName {
 		s.redis.PutUrlToQueue(s.wsInfo.Host, obj.Url)
 	}
 }

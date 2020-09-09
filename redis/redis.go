@@ -27,8 +27,12 @@ func NewRedis() *RedisUtil {
 	return &RedisUtil{conn: conn, lock: new(sync.Mutex)}
 }
 
-func (r *RedisUtil) Pause() bool {
+func (r *RedisUtil) Pause(website string) bool {
 	v, _ := r.conn.Get("novel_spider_pause").Result()
+	if v == "1" {
+		return true
+	}
+	v, _ = r.conn.Get("novel_spider_pause_" + website).Result()
 	return v == "1"
 }
 

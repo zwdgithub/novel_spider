@@ -1,12 +1,11 @@
 package article
 
 import (
-	"fmt"
-	"github.com/baidubce/bce-sdk-go/services/bos"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"io/ioutil"
 	"net/http"
+	"novel_spider/bos_utils"
 	"strings"
 )
 
@@ -19,7 +18,7 @@ type NovelWebsite struct {
 	Category     map[string]interface{} // 分类
 	IProxy       *IProxy
 	HasChapter   bool
-	BosClient    *bos.Client
+	BosUtil      *bos_utils.BosUtil
 	Concurrent   int
 	ShortContent int
 }
@@ -30,6 +29,7 @@ type Article struct {
 	LastChapter string
 	SortId      int
 	Intro       string
+	ImgUrl      string
 }
 
 type IProxy struct {
@@ -40,11 +40,10 @@ type IProxy struct {
 
 func (novel *NovelWebsite) putContent(aid, cid int, content string) error {
 	reader := transform.NewReader(strings.NewReader(content), simplifiedchinese.GBK.NewDecoder())
-	fileName := fmt.Sprintf("%d%d%d", aid, aid, cid)
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
 		return err
 	}
-	_, err = novel.BosClient.PutObjectFromString("bucket", fileName, string(b), nil)
+	err = novel.BosUtil.PutChapter(aid, cid, string(b))
 	return err
 }
