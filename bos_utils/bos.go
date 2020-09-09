@@ -1,12 +1,10 @@
 package bos_utils
 
 import (
-	"bytes"
 	"fmt"
+	"github.com/axgle/mahonia"
 	"github.com/baidubce/bce-sdk-go/services/bos"
 	"github.com/baidubce/bce-sdk-go/util/log"
-	"golang.org/x/text/encoding/simplifiedchinese"
-	"golang.org/x/text/transform"
 	"io/ioutil"
 )
 
@@ -34,13 +32,10 @@ func NewBosClient() *BosUtil {
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {
-	reader := transform.NewReader(bytes.NewReader([]byte(content)), simplifiedchinese.GBK.NewDecoder())
-	bb, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return err
-	}
+	enc := mahonia.NewEncoder("gbk")
+	content = enc.ConvertString(content)
 	objName := fmt.Sprintf(chapterNameFmt, aid/1000, aid, cid)
-	r, err := b.bos.PutObjectFromBytes(b.bucket, objName, bb, nil)
+	r, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
 	fmt.Println(r)
 	return err
 }
