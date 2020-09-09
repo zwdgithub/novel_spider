@@ -4,18 +4,26 @@ import (
 	"github.com/jinzhu/gorm"
 	"novel_spider/bos_utils"
 	"novel_spider/model"
+	"novel_spider/redis"
 	"time"
 )
 
 type ArticleService struct {
-	db  *gorm.DB
-	bos *bos_utils.BosUtil
+	db    *gorm.DB
+	bos   *bos_utils.BosUtil
+	redis *redis.RedisUtil
 }
 
-func NewArticleService(db *gorm.DB) *ArticleService {
+func NewArticleService(db *gorm.DB, redis *redis.RedisUtil, bos *bos_utils.BosUtil) *ArticleService {
 	return &ArticleService{
-		db: db,
+		db:    db,
+		bos:   bos,
+		redis: redis,
 	}
+}
+
+func (service *ArticleService) GetRedis() *redis.RedisUtil {
+	return service.redis
 }
 
 func (service *ArticleService) AddArticle(article *model.JieqiArticle) error {

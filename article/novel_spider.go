@@ -16,7 +16,6 @@ var (
 
 type NovelWebsites interface {
 	ArticleInfo(content string) (*Article, error)
-	LocalArticleInfo(articleName, author string) (*model.JieqiArticle, error)
 	ChapterList(content string) ([]NewChapter, error)
 	ChapterContent(chapterUrl string) (string, error)
 	Consumer() (string, error)
@@ -99,7 +98,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 	defer s.ParseEnd(article.ArticleName, article.Author)
 
-	local, err := s.ws.LocalArticleInfo(article.ArticleName, article.Author)
+	local, err := s.service.LocalArticleInfo(article.ArticleName, article.Author)
 	if err != nil {
 		return
 	}
