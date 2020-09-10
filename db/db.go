@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
+	logger "novel_spider/log"
 	"time"
 )
 
@@ -46,12 +47,13 @@ func New(conf *MysqlConfig) *gorm.DB {
 	if err != nil {
 		log.Fatal("mysql connection error ", err)
 	}
-	db.LogMode(true)
+	db.LogMode(false)
 	db.SingularTable(true)
 	// 空闲时最大连接数
 	db.DB().SetMaxIdleConns(10)
 	// 最大连接数
 	db.DB().SetMaxOpenConns(100)
 	db.DB().SetConnMaxLifetime(60 * time.Second)
+	db.SetLogger(logger.DBLogger{})
 	return db
 }

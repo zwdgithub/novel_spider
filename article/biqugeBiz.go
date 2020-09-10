@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/antchfx/htmlquery"
 	"novel_spider/db"
+	"novel_spider/log"
 	"novel_spider/redis"
 	"novel_spider/util"
 	"regexp"
@@ -27,7 +28,7 @@ func NewBiqugeBiz(service *db.ArticleService, redis *redis.RedisUtil) *BiqugeBiz
 			Headers:           nil,
 			Cookie:            nil,
 			IProxy:            nil,
-			Concurrent:        2,
+			Concurrent:        3,
 			NewChapterListUrl: "https://www.biquge.biz",
 		},
 		service: service,
@@ -45,16 +46,22 @@ func (n *BiqugeBiz) ArticleInfo(content string) (*Article, error) {
 
 func (n *BiqugeBiz) ChapterList(content string) ([]NewChapter, error) {
 	newChapters := make([]NewChapter, 0)
-	reg := regexp.MustCompile(`<dd><a href="(.+?)"  >(.+?)</a></dd>`)
-	chapters := reg.FindAllString(content, -1)
-
-	for _, v := range chapters {
-		c := reg.FindStringSubmatch(v)
-		newChapters = append(newChapters, NewChapter{
-			Url:         n.Host + c[1],
-			ChapterName: c[2],
-		})
+	doc, err := htmlquery.Parse(strings.NewReader(content))
+	if err != nil {
+		return newChapters, err
 	}
+	nodes := htmlquery.Find(doc, `//div[@id="list"]/dl/dd/a`)
+	for _, item := range nodes {
+		temp := NewChapter{
+			Url:         n.Host + strings.Trim(htmlquery.SelectAttr(item, "href"), " "),
+			ChapterName: strings.Trim(htmlquery.InnerText(item), " "),
+		}
+		if temp.Url == "" || temp.ChapterName == "" {
+			return newChapters, errors.New(fmt.Sprintf("url or chapterName is none, url:%s, chapterName: %s", temp.Url, temp.ChapterName))
+		}
+		newChapters = append(newChapters, temp)
+	}
+
 	return newChapters, nil
 }
 
@@ -122,8 +129,8 @@ func (n *BiqugeBiz) NewList() ([]string, error) {
 			NewChapterName: newChapterName,
 		})
 		s := string(b)
+		log.Infof("%s, need update %s", n.Host, s)
 		r = append(r, s)
 	}
-	fmt.Println(r)
 	return r, nil
 }

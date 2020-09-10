@@ -3,7 +3,9 @@ package article
 import (
 	"encoding/json"
 	"errors"
+	"go.uber.org/zap"
 	"novel_spider/db"
+	"novel_spider/log"
 	"novel_spider/model"
 	"novel_spider/redis"
 	"novel_spider/util"
@@ -13,6 +15,7 @@ import (
 var (
 	contentShortError = errors.New("content length too short")
 	chapterNotMatch   = errors.New("no chapter need to update ")
+	logger            *zap.SugaredLogger
 )
 
 type NovelWebsites interface {
@@ -61,6 +64,7 @@ func (s *NovelSpider) Consumer() {
 	c := make(chan int, s.wsInfo.Concurrent)
 	for {
 		if s.redis.Pause(s.wsInfo.Host) {
+			log.Infof("%s, spider stop", s.wsInfo.Host)
 			return
 		}
 		if len(c) < s.wsInfo.Concurrent {
@@ -84,25 +88,31 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	defer func() {
 		<-c
 		if err := recover(); err != nil {
+			log.Errorf("process %s, err: %v", obj.Url, err)
 		}
+		log.Infof("process %s, end", obj.Url)
 	}()
-
+	log.Infof("process %s, start", obj.Url)
 	content, err := util.Get(obj.Url, s.wsInfo.Encoding, s.wsInfo.Headers)
 	if err != nil {
+		log.Infof("process %s, http get error: %v", obj.Url, err)
 		return
 	}
 	article, err := s.ws.ArticleInfo(content)
 	if err != nil || article == nil || article.ArticleName == "" || article.Author == "" {
+		log.Infof("process %s, parse article info error, ", obj.Url)
 		return
 	}
 	canParse, err := s.CanParse(article.ArticleName, article.Author)
 	if err != nil || !canParse {
+		log.Infof("process url: %s, can not parse now,", obj.Url)
 		return
 	}
 	defer s.ParseEnd(article.ArticleName, article.Author)
 
 	local, err := s.service.LocalArticleInfo(article.ArticleName, article.Author)
 	if err != nil {
+		log.Infof("process %s, get local info error: %v ", obj.Url, err)
 		return
 	}
 	if local.Articleid == 0 {
@@ -113,6 +123,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		err := s.service.AddArticle(newArticle)
 		// TODO download cover
 		if err != nil {
+			log.Infof("process %s, add new article error %v", obj.Url, err)
 			return
 		}
 		local = newArticle
@@ -120,6 +131,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 
 	allChapters, err := s.ws.ChapterList(content)
 	if err != nil || len(allChapters) == 0 {
+		log.Infof("process %s, parse chapter list error: %v", obj.Url, err)
 		return
 	}
 	targetLast := obj.NewChapterName
@@ -129,6 +141,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 
 	article.LastChapter = targetLast
 	if article.LastChapter == local.Lastchapter {
+		log.Infof("process %s, need not update", obj.Url)
 		return
 	}
 
@@ -138,29 +151,32 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	if local.Chapters == 0 {
 		match = true
 	}
-	if !match {
-		for _, item := range allChapters {
-			if item.ChapterName == local.Lastchapter {
-				match = true
-			}
-			if match {
-				newChapters = append(newChapters, item)
-			}
+	for _, item := range allChapters {
+		if item.ChapterName == local.Lastchapter {
+			match = true
+		}
+		if match {
+			newChapters = append(newChapters, item)
 		}
 	}
 	if !match {
+		log.Infof("process %s, no chapter match, info: %s, %s, %s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
 		return
 	}
 	if len(newChapters) == 0 {
+		log.Infof("process %s, new chapters none, info: name:%s, author:%s, last:%s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
 		return
 	}
 
+	retry := true
 	for _, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
+			log.Infof("process %s stop", obj.Url)
 			return
 		}
 		content, err := s.ws.ChapterContent(item.Url)
 		if err != nil {
+			log.Infof("process %s get content error: %v", obj.Url, err)
 			return
 		}
 		chapter := &model.JieqiChapter{
@@ -171,14 +187,21 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 		chapter, err = s.service.AddChapter(chapter, content)
 		if err != nil {
+			log.Infof("process %s add chapter error: %v", obj.Url, err)
 			return
 		}
 		order += 1
+		if obj.NewChapterName != "" && obj.NewChapterName == item.ChapterName {
+			retry = false
+		}
 	}
+	log.Infof("process %s success", obj.Url)
 
-	if len(newChapters) > 0 && obj.NewChapterName != "" && newChapters[len(newChapters)-1].ChapterName != obj.NewChapterName {
+	if retry {
+		log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
 		s.redis.PutUrlToQueue(s.wsInfo.Host, obj.Url)
 	}
+	time.Sleep(time.Second * 10)
 }
 
 func (s *NovelSpider) NewList() {

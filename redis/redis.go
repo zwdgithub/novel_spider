@@ -69,6 +69,10 @@ func (r *RedisUtil) PutUrlToQueue(website, url string) {
 	}
 }
 
+func (r *RedisUtil) Retry(website, url string) {
+
+}
+
 func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
 	key := fmt.Sprintf(NeedParseListKey, website)
 	v, err := r.conn.BRPop(time.Second*2, key).Result()

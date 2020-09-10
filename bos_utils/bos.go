@@ -34,6 +34,7 @@ func NewBosClient() *BosUtil {
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {
+	return nil
 	enc := mahonia.NewEncoder("gbk")
 	content = enc.ConvertString(content)
 	objName := fmt.Sprintf(chapterNameFmt, aid/1000, aid, cid)
