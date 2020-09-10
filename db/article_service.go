@@ -35,7 +35,7 @@ func (service *ArticleService) AddArticle(article *model.JieqiArticle) error {
 }
 
 func (service *ArticleService) UpdateArticleOnAddChapter(article *model.JieqiArticle) error {
-	err := service.db.Where("articleid = ?", article.Articleid).Update(map[string]interface{}{
+	err := service.db.Model(model.JieqiArticle{}).Where("articleid = ?", article.Articleid).Update(map[string]interface{}{
 		"lastupdate":  int(time.Now().Unix()),
 		"lastchapter": article.Lastchapter,
 		"chapters":    article.Chapters,
@@ -48,7 +48,8 @@ func (service *ArticleService) AddChapter(chapter *model.JieqiChapter, content s
 	chapter.Lastupdate = int(time.Now().Unix())
 	chapter.Posterid = 0
 	chapter.Poster = "a"
-	err := service.db.Create(&chapter).Error
+	chapter.Size = len(content)
+	err := service.db.Create(chapter).Error
 	if err != nil {
 		return chapter, err
 	}

@@ -4,7 +4,7 @@ package model
 siteid, postdate, lastupdate, articlename, keywords, initial, author, posterid, poster, sortid, intro, notice, setting
 */
 type JieqiArticle struct {
-	Articleid   int
+	Articleid   int `gorm:"primary_key"`
 	Articlename string
 	Author      string
 	Lastchapter string
@@ -20,7 +20,7 @@ type JieqiArticle struct {
 }
 
 type JieqiChapter struct {
-	Chapterid    int
+	Chapterid    int `gorm:"primary_key"`
 	Chaptername  string
 	Articleid    int
 	Articlename  string

@@ -13,7 +13,7 @@ func main() {
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
-	website := article.NewBiqugeBiz(service)
+	website := article.NewBiqugeBiz(service, redisConn)
 	spider := article.NewNovelSpider(website, website.NovelWebsite, service, redisConn)
 	spider.NewList()
 }

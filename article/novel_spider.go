@@ -1,6 +1,7 @@
 package article
 
 import (
+	"encoding/json"
 	"errors"
 	"novel_spider/db"
 	"novel_spider/model"
@@ -63,15 +64,17 @@ func (s *NovelSpider) Consumer() {
 			return
 		}
 		if len(c) < s.wsInfo.Concurrent {
-			url, err := s.ws.Consumer()
+			content, err := s.ws.Consumer()
 			if err != nil {
 				time.Sleep(time.Second * 5)
 			}
+			var obj NewArticle
+			err = json.Unmarshal([]byte(content), &obj)
+			if err != nil {
+				continue
+			}
 			c <- 1
-			go s.Process(NewArticle{
-				Url:            url,
-				NewChapterName: "",
-			}, c)
+			go s.Process(obj, c)
 		}
 		time.Sleep(time.Second / 2)
 	}
@@ -141,7 +144,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 				match = true
 			}
 			if match {
-				newChapters = append(newChapters)
+				newChapters = append(newChapters, item)
 			}
 		}
 	}
@@ -186,4 +189,5 @@ func (s *NovelSpider) NewList() {
 	for _, u := range list {
 		s.redis.PutUrlToQueue(s.wsInfo.Host, u)
 	}
+	time.Sleep(time.Second * 20)
 }

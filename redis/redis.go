@@ -65,7 +65,7 @@ func (r *RedisUtil) PutUrlToQueue(website, url string) {
 		return
 	}
 	if v == 1 {
-		r.conn.LPush(url)
+		r.conn.LPush(key, url)
 	}
 }
 
@@ -79,5 +79,5 @@ func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
 		return "", errors.New("do not have some url to parse")
 	}
 	r.conn.SRem(key+"_set", v[0])
-	return v[0], nil
+	return v[1], nil
 }

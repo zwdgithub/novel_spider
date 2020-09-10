@@ -9,7 +9,8 @@ import (
 	"io/ioutil"
 )
 
-const chapterNameFmt = "/files/%d/%d/%d.txt"
+const chapterNameFmt = "/files/article/txt/%d/%d/%d.txt"
+const coverNameFmt = "/files/article/image/%d/%d/%ds.jpg"
 
 type BosUtil struct {
 	bos    *bos.Client
@@ -37,13 +38,14 @@ func (b *BosUtil) PutChapter(aid, cid int, content string) error {
 	content = enc.ConvertString(content)
 	objName := fmt.Sprintf(chapterNameFmt, aid/1000, aid, cid)
 	r, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
+	err = nil
 	fmt.Println(r)
 	return err
 }
 
-func (b *BosUtil) PutCover(aid int) error {
+func (b *BosUtil) PutCover(url string, aid int) error {
 	h := xhttp.NewHttpUtil()
-	h.Get("https://www.ihxs.la/files/article/image/69/69938/69938s.jpg").Do()
+	h.Get(url).Do()
 	if h.Error() != nil {
 		return h.Error()
 	}
@@ -53,8 +55,9 @@ func (b *BosUtil) PutCover(aid int) error {
 	if err != nil {
 		return err
 	}
-	r, err := b.bos.PutObjectFromBytes(b.bucket, "6.jpg", bb, nil)
-	fmt.Println(r)
+	objName := fmt.Sprintf(coverNameFmt, aid/1000, aid, aid)
+	_, err = b.bos.PutObjectFromBytes(b.bucket, objName, bb, nil)
+
 	if err != nil {
 		return err
 	}
