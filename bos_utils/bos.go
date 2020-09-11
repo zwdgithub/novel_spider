@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	l "log"
 	"novel_spider/log"
+	"novel_spider/util"
 )
 
 const chapterNameFmt = "/files/article/txt/%d/%d/%d.txt"
@@ -21,18 +22,35 @@ type BosUtil struct {
 
 func NewBosClient() *BosUtil {
 	// 用户的Access Key ID和Secret Access Key
-	AK, SK := "", ""
-	ENDPOINT := "hkg.bcebos.com"
+	conf := loadYaml("config/bos_conf.yaml")
+	log.Info(conf)
 	// 初始化一个BosClient
-	bosClient, err := bos.NewClient(AK, SK, ENDPOINT)
+	bosClient, err := bos.NewClient(conf.AK, conf.SK, conf.Endpoint)
 	if err != nil {
 		l.Fatal("bos init error ", err)
 	}
 
 	return &BosUtil{
 		bos:    bosClient,
-		bucket: "testxxfile",
+		bucket: conf.Bucket,
 	}
+}
+
+type BosConf struct {
+	AK       string `yaml:"ak"`
+	SK       string `yaml:"sk"`
+	Endpoint string `yaml:"endpoint"`
+	Bucket   string `yaml:"bucket"`
+}
+
+func loadYaml(fileName string) *BosConf {
+	var dst *BosConf
+	r, err := util.LoadYaml(fileName, dst)
+	if err != nil {
+		l.Fatal(err)
+	}
+	dst = r.(*BosConf)
+	return dst
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {

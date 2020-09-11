@@ -3,6 +3,7 @@ package test
 import (
 	"novel_spider/bos_utils"
 	"novel_spider/log"
+	"novel_spider/util"
 	"regexp"
 	"strings"
 	"testing"
@@ -136,4 +137,8 @@ func TestBos(t *testing.T) {
 
 func TestLogger(t *testing.T) {
 	log.Infof("this is a log msg")
+}
+
+func TestReflect(t *testing.T) {
+	util.LoadYaml("../config/bos_conf.yaml", bos_utils.BosConf{})
 }

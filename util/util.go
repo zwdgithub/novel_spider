@@ -6,9 +6,11 @@ import (
 	xhttp "github.com/zwdgithub/simple_http"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
+	"gopkg.in/yaml.v2"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 )
 
 type Headers map[string]string
@@ -49,4 +51,22 @@ func Get(url, encoding string, p ...interface{}) (string, error) {
 		return string(content), nil
 	}
 	return "", errors.New(fmt.Sprintf("http get %s error ", url))
+}
+
+func LoadYaml(fileName string, dst interface{}) (interface{}, error) {
+	t := reflect.TypeOf(dst)
+	if t.Kind() == reflect.Ptr { //指针类型获取真正type需要调用Elem
+		t = t.Elem()
+	}
+	newItem := reflect.New(t).Interface()
+	file, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return nil, err
+	}
+
+	err = yaml.Unmarshal(file, newItem)
+	if err != nil {
+		return nil, err
+	}
+	return newItem, nil
 }
