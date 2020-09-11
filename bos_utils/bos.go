@@ -10,6 +10,7 @@ import (
 	l "log"
 	"novel_spider/log"
 	"novel_spider/util"
+	"strings"
 )
 
 const chapterNameFmt = "/files/article/txt/%d/%d/%d.txt"
@@ -47,11 +48,12 @@ type BosConf struct {
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {
+
 	enc := mahonia.NewEncoder("gbk")
 	content = enc.ConvertString(content)
+	content = strings.ReplaceAll(content, "\x1A", "  ")
 	objName := fmt.Sprintf(chapterNameFmt, aid/1000, aid, cid)
-	r, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
-	log.Info(r)
+	_, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
 	return err
 }
 

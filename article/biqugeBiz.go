@@ -81,7 +81,7 @@ func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
 		return "", errors.New("")
 	}
 	content = htmlquery.OutputHTML(cNode, false)
-	content = strings.ReplaceAll(content, "&nbsp;", "")
+	content = strings.ReplaceAll(content, "\x1A", "")
 	content = strings.ReplaceAll(content, "<br>", "\r\n")
 	content = strings.ReplaceAll(content, "<br/>", "\r\n")
 	content = strings.ReplaceAll(content, "<br >", "\r\n")

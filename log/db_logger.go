@@ -12,7 +12,7 @@ var dbLogger *zap.SugaredLogger
 func init() {
 
 	w := zapcore.AddSync(&lumberjack.Logger{
-		Filename:  "c:/goworkspace/novel_spider/log/db.log",
+		Filename:  "log/db.log",
 		MaxSize:   100, //MB
 		LocalTime: true,
 		Compress:  true,

@@ -169,6 +169,8 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		log.Infof("process %s, no chapter match, info: %s, %s, %s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
 		return
 	}
+
+	log.Infof("process %s, need crawl chapter %d", obj.Url, len(newChapters))
 	if len(newChapters) == 0 {
 		log.Infof("process %s, new chapters none, info: name:%s, author:%s, last:%s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
 		return
