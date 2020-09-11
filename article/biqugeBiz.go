@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/antchfx/htmlquery"
+	"novel_spider/bos_utils"
 	"novel_spider/db"
 	"novel_spider/log"
 	"novel_spider/redis"
@@ -18,9 +19,10 @@ type BiqugeBiz struct {
 	redis   *redis.RedisUtil
 }
 
-func NewBiqugeBiz(service *db.ArticleService, redis *redis.RedisUtil) *BiqugeBiz {
+func NewBiqugeBiz(service *db.ArticleService, redis *redis.RedisUtil, bos *bos_utils.BosUtil) *BiqugeBiz {
 	website := LoadNovelWebsite("config/website.biquge.biz.yaml")
 	log.Info(website)
+	website.BosUtil = bos
 	c := &BiqugeBiz{
 		NovelWebsite: website,
 		service:      service,
@@ -40,6 +42,7 @@ func (n *BiqugeBiz) ArticleInfo(content string) (*Article, error) {
 	if v, ok := n.Category[article.Category]; ok {
 		article.SortId = v
 	}
+	log.Infof("article info :%v", article)
 	return article, err
 }
 

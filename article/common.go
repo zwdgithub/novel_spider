@@ -2,7 +2,6 @@ package article
 
 import (
 	"errors"
-	"fmt"
 	xhttp "github.com/zwdgithub/simple_http"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -14,14 +13,14 @@ import (
 
 func ParseArticleInfo(content string) (*Article, error) {
 	var info Article
-	regexpTitle := regexp.MustCompile(`<meta property="og:title" content="(.+?)"/>`)
-	title := regexpTitle.FindStringSubmatch(content)
+	reg := regexp.MustCompile(`<meta property="og:title" content="(.+?)"/>`)
+	title := reg.FindStringSubmatch(content)
 	if len(title) <= 1 {
 		return nil, errors.New("title find error")
 	}
 
-	regexpAuthor := regexp.MustCompile(`<meta property="og:novel:author" content="(.+?)"/>`)
-	author := regexpAuthor.FindStringSubmatch(content)
+	reg = regexp.MustCompile(`<meta property="og:novel:author" content="(.+?)"/>`)
+	author := reg.FindStringSubmatch(content)
 	if len(title) <= 1 {
 		return nil, errors.New("author find error")
 	}
@@ -31,7 +30,18 @@ func ParseArticleInfo(content string) (*Article, error) {
 	if index != -1 {
 		info.ArticleName = info.ArticleName[0:index]
 	}
-	fmt.Println(info)
+	reg = regexp.MustCompile(`<meta property="og:novel:category" content="(.+?)"/>`)
+	category := reg.FindStringSubmatch(content)
+	if len(category) <= 1 {
+		return nil, errors.New("category find error")
+	}
+	info.Category = category[1]
+	reg = regexp.MustCompile(`<meta property="og:image" content="(.+?)"/>`)
+	img := reg.FindStringSubmatch(content)
+	if len(img) <= 1 {
+		return nil, errors.New("category find error")
+	}
+	info.ImgUrl = img[1]
 	return &info, nil
 }
 

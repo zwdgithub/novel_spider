@@ -8,6 +8,7 @@ import (
 	"novel_spider/model"
 	"novel_spider/redis"
 	"novel_spider/util"
+	"runtime"
 	"time"
 )
 
@@ -87,6 +88,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		<-c
 		if err := recover(); err != nil {
 			log.Errorf("process %s, err: %v", obj.Url, err)
+			stack := make([]byte, 1024*8)
+			stack = stack[:runtime.Stack(stack, false)]
+			log.Error(string(stack))
 		}
 		log.Infof("process %s, end", obj.Url)
 	}()

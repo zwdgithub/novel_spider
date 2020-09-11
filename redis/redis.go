@@ -48,6 +48,7 @@ func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
 	if v > 1 {
 		return false, err
 	}
+	r.conn.Expire(key, time.Minute*60*3)
 	return true, nil
 }
 

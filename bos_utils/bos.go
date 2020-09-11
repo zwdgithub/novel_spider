@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"github.com/axgle/mahonia"
 	"github.com/baidubce/bce-sdk-go/services/bos"
-	"github.com/baidubce/bce-sdk-go/util/log"
+	"github.com/baidubce/bce-sdk-go/services/bos/api"
 	xhttp "github.com/zwdgithub/simple_http"
 	"io/ioutil"
+	l "log"
+	"novel_spider/log"
 )
 
 const chapterNameFmt = "/files/article/txt/%d/%d/%d.txt"
@@ -24,7 +26,7 @@ func NewBosClient() *BosUtil {
 	// 初始化一个BosClient
 	bosClient, err := bos.NewClient(AK, SK, ENDPOINT)
 	if err != nil {
-		log.Fatal("bos init error ", err)
+		l.Fatal("bos init error ", err)
 	}
 
 	return &BosUtil{
@@ -57,7 +59,8 @@ func (b *BosUtil) PutCover(url string, aid int) error {
 		return err
 	}
 	objName := fmt.Sprintf(coverNameFmt, aid/1000, aid, aid)
-	_, err = b.bos.PutObjectFromBytes(b.bucket, objName, bb, nil)
+	log.Infof("bos put cover %s", objName)
+	_, err = b.bos.PutObjectFromBytes(b.bucket, objName, bb, &api.PutObjectArgs{})
 
 	if err != nil {
 		return err
