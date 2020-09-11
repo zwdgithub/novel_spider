@@ -30,6 +30,7 @@ func main() {
 	in = append(in, reflect.ValueOf(redisConn))
 	in = append(in, reflect.ValueOf(bosClient))
 	callResult := reflect.ValueOf(factory).MethodByName(*w).Call(in)
+
 	if len(callResult) == 0 {
 		log.Info("website: %s, call method err", *w)
 		return

@@ -12,6 +12,8 @@ import (
 
 func main() {
 	var w = flag.String("website", "CreateBiqugeBiz", "website reflect")
+	flag.Parse()
+
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
 	bosClient := bos_utils.NewBosClient()
 	dbConn := db.New(dbConf)

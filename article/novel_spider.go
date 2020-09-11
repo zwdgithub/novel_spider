@@ -64,7 +64,7 @@ func (s *NovelSpider) Consumer() {
 	for {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("%s, spider stop", s.wsInfo.Host)
-			return
+			break
 		}
 		if len(c) < s.wsInfo.Concurrent {
 			content, err := s.ws.Consumer()
@@ -80,6 +80,9 @@ func (s *NovelSpider) Consumer() {
 			go s.Process(obj, c)
 		}
 		time.Sleep(time.Second / 2)
+	}
+	for len(c) > 0 {
+
 	}
 }
 

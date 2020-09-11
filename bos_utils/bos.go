@@ -54,13 +54,11 @@ func loadYaml(fileName string) *BosConf {
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {
-	return nil
 	enc := mahonia.NewEncoder("gbk")
 	content = enc.ConvertString(content)
 	objName := fmt.Sprintf(chapterNameFmt, aid/1000, aid, cid)
 	r, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
-	err = nil
-	fmt.Println(r)
+	log.Info(r)
 	return err
 }
 
