@@ -199,9 +199,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 
 	if retry {
 		log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
-		s.redis.PutUrlToQueue(s.wsInfo.Host, obj.Url)
+		s.redis.Retry(s.wsInfo.Host, obj.Url)
 	}
-	time.Sleep(time.Second * 10)
+	return
 }
 
 func (s *NovelSpider) NewList() {

@@ -26,7 +26,7 @@ func ParseArticleInfo(content string) (*Article, error) {
 	info.Author = author[1]
 	index := strings.Index(info.ArticleName, "（")
 	if index != -1 {
-		// info.ArticleName = info.ArticleName[0:index]
+		info.ArticleName = info.ArticleName[0:index]
 	}
 	fmt.Println(info)
 	return &info, nil

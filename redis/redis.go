@@ -70,7 +70,9 @@ func (r *RedisUtil) PutUrlToQueue(website, url string) {
 }
 
 func (r *RedisUtil) Retry(website, url string) {
-
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	r.PutUrlToQueue(website, url)
 }
 
 func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
@@ -82,6 +84,6 @@ func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
 	if len(v) <= 0 {
 		return "", errors.New("do not have some url to parse")
 	}
-	r.conn.SRem(key+"_set", v[0])
+	r.conn.SRem(key+"_set", v[1])
 	return v[1], nil
 }

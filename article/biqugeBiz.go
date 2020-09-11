@@ -9,7 +9,6 @@ import (
 	"novel_spider/log"
 	"novel_spider/redis"
 	"novel_spider/util"
-	"regexp"
 	"strings"
 )
 
@@ -70,19 +69,24 @@ func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	reg := regexp.MustCompile(`<div id="content">(.+?)</div>`)
-	c := reg.FindStringSubmatch(content)
-	if len(c) <= 1 {
-		return "", errors.New(fmt.Sprintf("chapter content regex error, err:%v, url: %s", err, url))
+	doc, err := htmlquery.Parse(strings.NewReader(content))
+	if err != nil {
+		return "", err
 	}
-	c[1] = strings.ReplaceAll(c[1], "&nbsp;", "")
-	c[1] = strings.ReplaceAll(c[1], "<br>", "\r\n")
-	c[1] = strings.ReplaceAll(c[1], "<br/>", "\r\n")
-	c[1] = strings.ReplaceAll(c[1], "<br >", "\r\n")
-	if len(c[1]) < n.ShortContent {
+	cNode, err := htmlquery.Query(doc, `//div[@id="content"]`)
+	if err != nil {
+		return "", errors.New("")
+	}
+	content = htmlquery.OutputHTML(cNode, false)
+	content = strings.ReplaceAll(content, "&nbsp;", "")
+	content = strings.ReplaceAll(content, "<br>", "\r\n")
+	content = strings.ReplaceAll(content, "<br/>", "\r\n")
+	content = strings.ReplaceAll(content, "<br >", "\r\n")
+	if len(content) < n.ShortContent {
 		return "", errors.New(fmt.Sprintf("short content, url: %s", url))
 	}
-	return c[1], err
+	log.Info(content)
+	return content, err
 }
 
 func (n *BiqugeBiz) Consumer() (string, error) {

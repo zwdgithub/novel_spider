@@ -47,7 +47,7 @@ func New(conf *MysqlConfig) *gorm.DB {
 	if err != nil {
 		log.Fatal("mysql connection error ", err)
 	}
-	db.LogMode(false)
+	db.LogMode(true)
 	db.SingularTable(true)
 	// 空闲时最大连接数
 	db.DB().SetMaxIdleConns(10)
