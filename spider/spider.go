@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	var w = flag.String("website", "CreateBiqugeBiz", "website reflect")
+	var w = flag.String("website", "CreateBiqugeBizSpider", "website reflect")
 	flag.Parse()
 
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
@@ -19,12 +19,11 @@ func main() {
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
-	factory := new(article.Factory)
 	in := make([]reflect.Value, 0)
 	in = append(in, reflect.ValueOf(service))
 	in = append(in, reflect.ValueOf(redisConn))
 	in = append(in, reflect.ValueOf(bosClient))
-	callResult := reflect.ValueOf(factory).MethodByName(*w).Call(in)
+	callResult := reflect.ValueOf(article.GetCreateSpider(*w)).Call(in)
 	if len(callResult) == 0 {
 		log.Info("website: %s, call method err", *w)
 		return

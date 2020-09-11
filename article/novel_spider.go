@@ -84,6 +84,7 @@ func (s *NovelSpider) Consumer() {
 	for len(c) > 0 {
 
 	}
+	log.Infof("%s, stop success", s.wsInfo.Host)
 }
 
 func (s *NovelSpider) Process(obj NewArticle, c chan int) {
