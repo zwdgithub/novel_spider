@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/antchfx/htmlquery"
 	"novel_spider/bos_utils"
 	"novel_spider/log"
 	"novel_spider/util"
@@ -141,4 +142,23 @@ func TestLogger(t *testing.T) {
 
 func TestReflect(t *testing.T) {
 	util.LoadYaml("../config/bos_conf.yaml", bos_utils.BosConf{})
+}
+
+func TestGBKHttp(t *testing.T) {
+	content, err := util.Get("https://m.ihxs.la/69_69938/50083136.html", "gbk")
+	if err != nil {
+		t.Log(err)
+	}
+	doc, err := htmlquery.Parse(strings.NewReader(content))
+	if err != nil {
+		t.Log(err)
+	}
+	cNode, err := htmlquery.Query(doc, `//div[@id="chaptercontent"]`)
+	if err != nil {
+		t.Log(err)
+	}
+	content = htmlquery.OutputHTML(cNode, false)
+	content = strings.Replace(content, " ", "", -1)
+	t.Log(content)
+
 }
