@@ -4,24 +4,21 @@ import (
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 	"io/ioutil"
-	"net/http"
 	"novel_spider/bos_utils"
 	"strings"
 )
 
 type NovelWebsite struct {
-	Name              string                 // 网站中文名
-	Host              string                 // 域名 qidian.com
-	Encoding          string                 // utf-8 gbk gb18030
-	Headers           map[string]string      // header
-	Cookie            http.CookieJar         // cookie
-	Category          map[string]interface{} // 分类
-	IProxy            *IProxy
-	HasChapter        bool
+	Name              string            `yaml:"name"`     // 网站中文名
+	Host              string            `yaml:"host"`     // 域名 qidian.com
+	Encoding          string            `yaml:"encoding"` // utf-8 gbk gb18030
+	Headers           map[string]string `yaml:"headers"`  // header
+	Category          map[string]int    `yaml:"category"` // 分类
+	HasChapter        bool              `yaml:"hasChapter"`
 	BosUtil           *bos_utils.BosUtil
-	Concurrent        int
-	ShortContent      int
-	NewChapterListUrl string
+	Concurrent        int    `yaml:"concurrent"`
+	ShortContent      int    `yaml:"shortContent"`
+	NewChapterListUrl string `yaml:"newChapterListUrl"`
 }
 
 type Article struct {
@@ -31,6 +28,7 @@ type Article struct {
 	SortId      int
 	Intro       string
 	ImgUrl      string
+	Category    string
 }
 
 type IProxy struct {

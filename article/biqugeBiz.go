@@ -19,19 +19,12 @@ type BiqugeBiz struct {
 }
 
 func NewBiqugeBiz(service *db.ArticleService, redis *redis.RedisUtil) *BiqugeBiz {
+	website := LoadNovelWebsite("config/website.biquge.biz.yaml")
+	log.Info(website)
 	c := &BiqugeBiz{
-		NovelWebsite: &NovelWebsite{
-			Name:              "biquge.biz",
-			Host:              "https://www.biquge.biz",
-			Encoding:          "GBK",
-			Headers:           nil,
-			Cookie:            nil,
-			IProxy:            nil,
-			Concurrent:        3,
-			NewChapterListUrl: "https://www.biquge.biz",
-		},
-		service: service,
-		redis:   redis,
+		NovelWebsite: website,
+		service:      service,
+		redis:        redis,
 	}
 	c.Headers = map[string]string{
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36",
@@ -40,7 +33,14 @@ func NewBiqugeBiz(service *db.ArticleService, redis *redis.RedisUtil) *BiqugeBiz
 }
 
 func (n *BiqugeBiz) ArticleInfo(content string) (*Article, error) {
-	return ParseArticleInfo(content)
+	article, err := ParseArticleInfo(content)
+	if err != nil {
+		return nil, err
+	}
+	if v, ok := n.Category[article.Category]; ok {
+		article.SortId = v
+	}
+	return article, err
 }
 
 func (n *BiqugeBiz) ChapterList(content string) ([]NewChapter, error) {
@@ -85,7 +85,6 @@ func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
 	if len(content) < n.ShortContent {
 		return "", errors.New(fmt.Sprintf("short content, url: %s", url))
 	}
-	log.Info(content)
 	return content, err
 }
 

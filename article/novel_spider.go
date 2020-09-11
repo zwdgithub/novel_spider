@@ -3,7 +3,6 @@ package article
 import (
 	"encoding/json"
 	"errors"
-	"go.uber.org/zap"
 	"novel_spider/db"
 	"novel_spider/log"
 	"novel_spider/model"
@@ -15,7 +14,6 @@ import (
 var (
 	contentShortError = errors.New("content length too short")
 	chapterNotMatch   = errors.New("no chapter need to update ")
-	logger            *zap.SugaredLogger
 )
 
 type NovelWebsites interface {
@@ -121,7 +119,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			Author:      article.Author,
 		}
 		err := s.service.AddArticle(newArticle)
-		// TODO download cover
+		_ = s.wsInfo.BosUtil.PutCover(article.ImgUrl, newArticle.Articleid)
 		if err != nil {
 			log.Infof("process %s, add new article error %v", obj.Url, err)
 			return
@@ -169,6 +167,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 
 	retry := true
+	addChapterNum := 0
 	for _, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("process %s stop", obj.Url)
@@ -190,12 +189,13 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			log.Infof("process %s add chapter error: %v", obj.Url, err)
 			return
 		}
+		addChapterNum++
 		order += 1
 		if obj.NewChapterName != "" && obj.NewChapterName == item.ChapterName {
 			retry = false
 		}
 	}
-	log.Infof("process %s success", obj.Url)
+	log.Infof("process %s, success, add %d chapter", obj.Url, addChapterNum)
 
 	if retry {
 		log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
@@ -212,5 +212,4 @@ func (s *NovelSpider) NewList() {
 	for _, u := range list {
 		s.redis.PutUrlToQueue(s.wsInfo.Host, u)
 	}
-	time.Sleep(time.Second * 20)
 }

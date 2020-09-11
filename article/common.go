@@ -4,6 +4,9 @@ import (
 	"errors"
 	"fmt"
 	xhttp "github.com/zwdgithub/simple_http"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -38,4 +41,17 @@ func Get(url string, customClient func(client *http.Client) *http.Client) (strin
 		return h.RContent()
 	}
 	return h.CustomClient(customClient).RContent()
+}
+
+func LoadNovelWebsite(fileName string) *NovelWebsite {
+	var dst *NovelWebsite
+	file, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = yaml.Unmarshal(file, &dst)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dst
 }
