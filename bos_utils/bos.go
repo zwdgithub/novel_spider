@@ -21,10 +21,13 @@ type BosUtil struct {
 }
 
 func NewBosClient() *BosUtil {
-	// 用户的Access Key ID和Secret Access Key
-	conf := loadYaml("config/bos_conf.yaml")
+	var conf *BosConf
+	r, err := util.LoadYaml("config/bos_conf.yaml", conf)
+	if err != nil {
+		l.Fatal("bos conf load yaml error")
+	}
+	conf = r.(*BosConf)
 	log.Info(conf)
-	// 初始化一个BosClient
 	bosClient, err := bos.NewClient(conf.AK, conf.SK, conf.Endpoint)
 	if err != nil {
 		l.Fatal("bos init error ", err)
@@ -41,16 +44,6 @@ type BosConf struct {
 	SK       string `yaml:"sk"`
 	Endpoint string `yaml:"endpoint"`
 	Bucket   string `yaml:"bucket"`
-}
-
-func loadYaml(fileName string) *BosConf {
-	var dst *BosConf
-	r, err := util.LoadYaml(fileName, dst)
-	if err != nil {
-		l.Fatal(err)
-	}
-	dst = r.(*BosConf)
-	return dst
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {
