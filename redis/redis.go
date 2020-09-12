@@ -68,7 +68,7 @@ func (r *RedisUtil) ParseEnd(articleName, author string) {
 
 func (r *RedisUtil) PutUrlToQueue(website, url string) {
 	key := fmt.Sprintf(NeedParseListKey, website)
-	v, err := r.conn.SAdd(key+"_set", url).Result()
+	v, err := r.conn.SAdd(website+"_set", url).Result()
 	if err != nil {
 		return
 	}
@@ -92,6 +92,6 @@ func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
 	if len(v) <= 0 {
 		return "", errors.New("do not have some url to parse")
 	}
-	r.conn.SRem(key+"_set", v[1])
+	r.conn.SRem(website+"_set", v[1])
 	return v[1], nil
 }
