@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
-	"novel_spider/log"
 	"sync"
 	"time"
 )
@@ -62,7 +61,6 @@ func (r *RedisUtil) ParseEnd(articleName, author string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	key := fmt.Sprintf(ParsingKey, articleName, author)
-	log.Infof("redis parse end %s", key)
 	r.conn.Del(key)
 	r.conn.Del(articleName + "|" + author)
 }

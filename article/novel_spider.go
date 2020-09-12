@@ -9,6 +9,7 @@ import (
 	"novel_spider/redis"
 	"novel_spider/util"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -129,6 +130,8 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		newArticle := &model.JieqiArticle{
 			Articlename: article.ArticleName,
 			Author:      article.Author,
+			Intro:       article.Intro,
+			Sortid:      article.SortId,
 		}
 		err := s.service.AddArticle(newArticle)
 		_ = s.wsInfo.BosUtil.PutCover(article.ImgUrl, newArticle.Articleid)
@@ -162,7 +165,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		match = true
 	}
 	for _, item := range allChapters {
-		if item.ChapterName == local.Lastchapter {
+		if strings.Trim(item.ChapterName, " ") == strings.Trim(local.Lastchapter, " ") {
 			match = true
 		}
 		if match {

@@ -4,19 +4,20 @@ package model
 siteid, postdate, lastupdate, articlename, keywords, initial, author, posterid, poster, sortid, intro, notice, setting
 */
 type JieqiArticle struct {
-	Articleid   int `gorm:"primary_key"`
-	Articlename string
-	Author      string
-	Lastchapter string
-	Chapters    int
-	Postdate    int
-	Lastupdate  int
-	Keywords    string
-	Posterid    int
-	Sortid      int
-	Intro       string
-	Notice      string
-	Setting     string
+	Articleid     int `gorm:"primary_key"`
+	Articlename   string
+	Author        string
+	Lastchapter   string
+	Lastchapterid int
+	Chapters      int
+	Postdate      int
+	Lastupdate    int
+	Keywords      string
+	Posterid      int
+	Sortid        int
+	Intro         string
+	Notice        string
+	Setting       string
 }
 
 type JieqiChapter struct {

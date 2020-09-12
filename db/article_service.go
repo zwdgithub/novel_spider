@@ -27,6 +27,9 @@ func (service *ArticleService) GetRedis() *redis.RedisUtil {
 }
 
 func (service *ArticleService) AddArticle(article *model.JieqiArticle) error {
+	if article.Sortid == 0 {
+		article.Sortid = 7
+	}
 	article.Posterid = 0
 	article.Postdate = int(time.Now().Unix())
 	article.Lastupdate = int(time.Now().Unix())
@@ -36,9 +39,10 @@ func (service *ArticleService) AddArticle(article *model.JieqiArticle) error {
 
 func (service *ArticleService) UpdateArticleOnAddChapter(article *model.JieqiArticle) error {
 	err := service.db.Model(model.JieqiArticle{}).Where("articleid = ?", article.Articleid).Update(map[string]interface{}{
-		"lastupdate":  int(time.Now().Unix()),
-		"lastchapter": article.Lastchapter,
-		"chapters":    article.Chapters,
+		"lastupdate":    int(time.Now().Unix()),
+		"lastchapter":   article.Lastchapter,
+		"chapters":      article.Chapters,
+		"lastchapterid": article.Lastchapterid,
 	}).Error
 	return err
 }
@@ -60,9 +64,10 @@ func (service *ArticleService) AddChapter(chapter *model.JieqiChapter, content s
 		return nil, err
 	}
 	article := &model.JieqiArticle{
-		Articleid:   chapter.Articleid,
-		Lastchapter: chapter.Chaptername,
-		Chapters:    chapter.Chapterorder,
+		Articleid:     chapter.Articleid,
+		Lastchapter:   chapter.Chaptername,
+		Chapters:      chapter.Chapterorder,
+		Lastchapterid: chapter.Chapterid,
 	}
 	err = service.UpdateArticleOnAddChapter(article)
 	if err != nil {

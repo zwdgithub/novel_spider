@@ -15,7 +15,7 @@ func main() {
 	flag.Parse()
 
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
-	bosClient := bos_utils.NewBosClient()
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)

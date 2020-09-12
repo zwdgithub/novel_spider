@@ -21,9 +21,9 @@ type BosUtil struct {
 	bucket string
 }
 
-func NewBosClient() *BosUtil {
+func NewBosClient(fileName string) *BosUtil {
 	var conf *BosConf
-	r, err := util.LoadYaml("config/bos_conf.yaml", conf)
+	r, err := util.LoadYaml(fileName, conf)
 	if err != nil {
 		l.Fatal("bos conf load yaml error")
 	}
@@ -48,7 +48,6 @@ type BosConf struct {
 }
 
 func (b *BosUtil) PutChapter(aid, cid int, content string) error {
-
 	enc := mahonia.NewEncoder("gbk")
 	content = enc.ConvertString(content)
 	content = strings.ReplaceAll(content, "\x1A", "  ")
