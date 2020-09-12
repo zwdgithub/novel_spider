@@ -219,7 +219,8 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			Articlename:  local.Articlename,
 		}
 		chapter, err = s.service.AddChapter(chapter, content)
-		if contentError != nil && chapter != nil && chapter.Chapterid != 0 {
+
+		if util.ValidChapterName(item.ChapterName) && contentError != nil && chapter != nil && chapter.Chapterid != 0 {
 			s.service.AddErrorChapter(model.ChapterErrorLog{
 				Host:      s.wsInfo.Host,
 				ArticleId: local.Articleid,

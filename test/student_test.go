@@ -214,4 +214,5 @@ func TestDate(t *testing.T) {
 	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
 	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
 	fmt.Println(n)
+	t.Log(util.ValidChapterName("123"))
 }

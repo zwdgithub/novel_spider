@@ -11,6 +11,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"regexp"
+	"strings"
 )
 
 type Headers map[string]string
@@ -69,4 +71,13 @@ func LoadYaml(fileName string, dst interface{}) (interface{}, error) {
 		return nil, err
 	}
 	return newItem, nil
+}
+
+func ValidChapterName(chapterName string) bool {
+	if strings.Contains(chapterName, "请假") {
+		return false
+	}
+	reg := regexp.MustCompile("[\\d+一二三四五六七八九十百千第章节]")
+	c := reg.FindString(chapterName)
+	return len(c) > 0
 }

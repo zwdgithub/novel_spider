@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"github.com/robfig/cron/v3"
 	"novel_spider/article"
 	"novel_spider/bos_utils"
 	"novel_spider/db"
@@ -34,5 +35,9 @@ func main() {
 		return
 	}
 	spider := callResult[0].Interface().(*article.NovelSpider)
-	spider.NewList()
+	// spider.NewList()
+	cronTask := cron.New()
+	_, _ = cronTask.AddFunc("* * * * *", spider.NewList)
+	cronTask.Run()
+
 }
