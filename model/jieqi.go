@@ -18,6 +18,8 @@ type JieqiArticle struct {
 	Intro         string
 	Notice        string
 	Setting       string
+	Fullflag      int
+	Imgflag       int
 }
 
 type JieqiChapter struct {
@@ -33,6 +35,7 @@ type JieqiChapter struct {
 	Postdate     int
 	Lastupdate   int
 	Attachment   string
+	Chaptertype  int
 }
 
 func (JieqiChapter) TableName() string {

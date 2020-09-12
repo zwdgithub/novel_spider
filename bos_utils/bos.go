@@ -15,6 +15,7 @@ import (
 
 const chapterNameFmt = "/files/article/txt/%d/%d/%d.txt"
 const coverNameFmt = "/files/article/image/%d/%d/%ds.jpg"
+const opfNameFmt = "/files/article/image/%d/%d/index.opf"
 
 type BosUtil struct {
 	bos    *bos.Client
@@ -52,6 +53,14 @@ func (b *BosUtil) PutChapter(aid, cid int, content string) error {
 	content = enc.ConvertString(content)
 	content = strings.ReplaceAll(content, "\x1A", "  ")
 	objName := fmt.Sprintf(chapterNameFmt, aid/1000, aid, cid)
+	_, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
+	return err
+}
+
+func (b *BosUtil) PutOpf(aid int, content string) error {
+	enc := mahonia.NewEncoder("gbk")
+	content = enc.ConvertString(content)
+	objName := fmt.Sprintf(opfNameFmt, aid/1000, aid)
 	_, err := b.bos.PutObjectFromString(b.bucket, objName, content, nil)
 	return err
 }

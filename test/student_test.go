@@ -178,3 +178,13 @@ func TestRedis(t *testing.T) {
 	r := redis.NewRedis()
 	r.CanParse("替嫁小妻超甜超可爱", "浅若初秋")
 }
+
+func TestGenOpf(t *testing.T) {
+	// 37490
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	service.GenOpf(37490)
+}

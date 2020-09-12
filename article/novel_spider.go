@@ -140,7 +140,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 		local = newArticle
 	}
-
+	defer s.service.GenOpf(local.Articleid)
 	allChapters, err := s.ws.ChapterList(content)
 	if err != nil || len(allChapters) == 0 {
 		log.Infof("process %s, parse chapter list error: %v", obj.Url, err)
