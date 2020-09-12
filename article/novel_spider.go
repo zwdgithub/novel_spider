@@ -172,7 +172,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 	}
 	if !match {
-		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, newChapters[len(newChapters)-1].ChapterName, local.Lastchapter)
+		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		return
 	}
 
