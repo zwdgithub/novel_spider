@@ -110,11 +110,15 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		return
 	}
 	canParse, err := s.CanParse(article.ArticleName, article.Author)
-	if err != nil || !canParse {
+	defer s.ParseEnd(article.ArticleName, article.Author)
+	if err != nil {
+		log.Infof("process url: %s, can not parse now, error: %v", obj.Url, err)
+		return
+	}
+	if !canParse {
 		log.Infof("process url: %s, can not parse now,", obj.Url)
 		return
 	}
-	defer s.ParseEnd(article.ArticleName, article.Author)
 
 	local, err := s.service.LocalArticleInfo(article.ArticleName, article.Author)
 	if err != nil {
