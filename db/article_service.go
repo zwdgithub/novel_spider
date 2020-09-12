@@ -99,7 +99,7 @@ func (service *ArticleService) NeedRepairChapterList(host string) []model.Chapte
 	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
 	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
 
-	service.db.Where("`host` = ? and retry_num < 10 and create_time > ?", host, n).Order("create_time").Limit("100").Find(&list)
+	service.db.Where("`host` = ? and retry_num < 10 and create_time > ? and repair = 0", host, n).Order("create_time").Limit("100").Find(&list)
 	return list
 }
 
