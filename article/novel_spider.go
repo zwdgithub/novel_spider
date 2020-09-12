@@ -170,7 +170,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 	}
 	if !match {
-		log.Infof("process %s, no chapter match, info: %s, %s, %s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
+		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, article.ArticleName, article.Author, article.LastChapter, allChapters[len(allChapters)-1].ChapterName)
 		return
 	}
 
@@ -181,6 +181,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 
 	retry := true
+	if obj.NewChapterName != "" {
+		retry = false
+	}
 	addChapterNum := 0
 	for _, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
