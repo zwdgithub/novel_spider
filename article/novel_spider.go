@@ -102,7 +102,13 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		log.Infof("process %s, end", obj.Url)
 	}()
 	log.Infof("process %s, start", obj.Url)
-	content, err := util.Get(obj.Url, s.wsInfo.Encoding, s.wsInfo.Headers)
+	content := ""
+	var err error
+	if s.wsInfo.Proxy {
+		content, err = util.GetWithProxy(obj.Url, s.wsInfo.Encoding, s.wsInfo.Headers)
+	} else {
+		content, err = util.Get(obj.Url, s.wsInfo.Encoding, s.wsInfo.Headers)
+	}
 	if err != nil {
 		log.Infof("process %s, http get error: %v", obj.Url, err)
 		return

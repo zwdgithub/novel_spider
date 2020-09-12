@@ -19,6 +19,7 @@ type NovelWebsite struct {
 	Concurrent        int    `yaml:"concurrent"`
 	ShortContent      int    `yaml:"shortContent"`
 	NewChapterListUrl string `yaml:"newChapterListUrl"`
+	Proxy             bool
 }
 
 type Article struct {

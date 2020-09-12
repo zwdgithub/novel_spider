@@ -13,6 +13,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 )
 
 type Headers map[string]string
@@ -37,7 +38,42 @@ func Get(url, encoding string, p ...interface{}) (string, error) {
 		h.Do()
 
 		if h.Error() != nil {
-			return "", h.Error()
+			time.Sleep(time.Second * 5)
+			continue
+		}
+		response := h.Response()
+		defer response.Body.Close()
+		var reader io.Reader
+		reader = response.Body
+		if encoding == EncodingGBK {
+			reader = transform.NewReader(response.Body, simplifiedchinese.GBK.NewDecoder())
+		}
+		content, err := ioutil.ReadAll(reader)
+		if err != nil {
+			continue
+		}
+		return string(content), nil
+	}
+	return "", errors.New(fmt.Sprintf("http get %s error ", url))
+}
+
+func GetWithProxy(url, encoding string, p ...interface{}) (string, error) {
+	for i := 0; i <= 3; i++ {
+		h := xhttp.NewHttpUtil()
+		h.Get("http://localhost:8092/get?url=" + url)
+		for _, item := range p {
+			switch v := item.(type) {
+			case Headers:
+				h.SetHeader(v)
+			case func(c *http.Client) *http.Client:
+				h.CustomClient(v)
+			}
+		}
+		h.Do()
+
+		if h.Error() != nil {
+			time.Sleep(time.Second * 5)
+			continue
 		}
 		response := h.Response()
 		defer response.Body.Close()
