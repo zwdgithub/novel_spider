@@ -173,7 +173,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 	}
 	if !match {
-		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, local.Lastchapter)
+		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, newChapters[len(newChapters)-1].ChapterName, local.Lastchapter)
 		return
 	}
 
@@ -206,6 +206,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 		chapter, err = s.service.AddChapter(chapter, content)
 		if err != nil {
+			s.redis.Retry(s.wsInfo.Host, obj.Url)
 			log.Infof("process %s add chapter error: %v", obj.Url, err)
 			return
 		}
