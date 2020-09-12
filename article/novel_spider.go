@@ -203,7 +203,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 		content, contentError := s.ws.ChapterContent(item.Url)
 		if contentError != nil {
-			log.Infof("process %s get content error: %v", obj.Url, err)
+			log.Infof("process %s get content error: %v", obj.Url, contentError)
 			content = shortContent
 		}
 		chapter := &model.JieqiChapter{
@@ -256,10 +256,11 @@ func (s *NovelSpider) NewList() {
 func (s *NovelSpider) Repair() {
 	for {
 		list := s.service.NeedRepairChapterList(s.wsInfo.Host)
-		log.Infof("need repair list len is %d", len(list))
+		log.Infof("repair, need repair list len is %d", len(list))
 		for _, item := range list {
 			content, err := s.ws.ChapterContent(item.Url)
 			if err != nil {
+				log.Infof("repair %s, get content error: %v", item.Url, err)
 				continue
 			}
 
