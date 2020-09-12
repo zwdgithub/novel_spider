@@ -48,6 +48,11 @@ func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
 	if v > 1 {
 		return false, err
 	}
+	p, err := r.conn.HGet(articleName+"|"+author, "parsing").Result()
+	if p == "1" {
+		return false, nil
+	}
+	r.conn.HSet(articleName+"|"+author, "parsing", 1)
 	r.conn.Expire(key, time.Minute*60*3)
 	return true, nil
 }
@@ -57,6 +62,7 @@ func (r *RedisUtil) ParseEnd(articleName, author string) {
 	defer r.lock.Unlock()
 	key := fmt.Sprintf(ParsingKey, articleName, author)
 	r.conn.Del(key)
+	r.conn.Del(articleName + "|" + author)
 }
 
 func (r *RedisUtil) PutUrlToQueue(website, url string) {
