@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/jinzhu/gorm"
 	"novel_spider/bos_utils"
 	"novel_spider/model"
@@ -85,4 +86,32 @@ func (service *ArticleService) LocalArticleInfo(articleName, author string) (*mo
 	}
 	return &info, err
 
+}
+
+func (service *ArticleService) AddErrorChapter(log model.ChapterErrorLog) {
+	log.CreateTime = time.Now().Format("2006-01-02 15:04:05")
+	log.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
+	service.db.Create(&log)
+}
+
+func (service *ArticleService) NeedRepairChapterList(host string) []model.ChapterErrorLog {
+	var list []model.ChapterErrorLog
+	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
+	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
+
+	service.db.Where("`host` = ? and retry_num < 10 and create_time > ?", host, n).Order("create_time").Limit("100").Find(&list)
+	return list
+}
+
+func (service *ArticleService) UpdateErrorChapter(id, retry, repair int) {
+
+	service.db.Model(model.ChapterErrorLog{}).Where("id = ? and repair = 0", id).Update(map[string]interface{}{
+		"retry_num":   retry,
+		"repair":      repair,
+		"update_time": time.Now().Format("2006-01-02 15:04:05"),
+	})
+}
+
+func (service *ArticleService) PutContent(aid, cid int, content string) error {
+	return service.bos.PutChapter(aid, cid, content)
 }

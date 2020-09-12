@@ -16,6 +16,7 @@ import (
 var (
 	contentShortError = errors.New("content length too short")
 	chapterNotMatch   = errors.New("no chapter need to update ")
+	shortContent      = "看最快更新无错小说，请记住 https://www.ihxs.la！章节内容正在手打中，请稍等片刻，内容更新后，请重新刷新页面，即可获取最新更新！"
 )
 
 type NovelWebsites interface {
@@ -200,10 +201,10 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			log.Infof("process %s stop", obj.Url)
 			return
 		}
-		content, err := s.ws.ChapterContent(item.Url)
-		if err != nil {
+		content, contentError := s.ws.ChapterContent(item.Url)
+		if contentError != nil {
 			log.Infof("process %s get content error: %v", obj.Url, err)
-			return
+			content = shortContent
 		}
 		chapter := &model.JieqiChapter{
 			Chapterorder: order + 1,
@@ -212,6 +213,16 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			Articlename:  local.Articlename,
 		}
 		chapter, err = s.service.AddChapter(chapter, content)
+		if contentError != nil && chapter != nil && chapter.Chapterid != 0 {
+			s.service.AddErrorChapter(model.ChapterErrorLog{
+				Host:      s.wsInfo.Host,
+				ArticleId: local.Articleid,
+				ChapterId: chapter.Chapterid,
+				Url:       item.Url,
+				ErrorType: 1,
+				RetryNum:  0,
+			})
+		}
 		if err != nil {
 			s.redis.Retry(s.wsInfo.Host, obj.Url)
 			log.Infof("process %s add chapter error: %v", obj.Url, err)
@@ -239,5 +250,31 @@ func (s *NovelSpider) NewList() {
 	}
 	for _, u := range list {
 		s.redis.PutUrlToQueue(s.wsInfo.Host, u)
+	}
+}
+
+func (s *NovelSpider) Repair() {
+	for {
+		list := s.service.NeedRepairChapterList(s.wsInfo.Host)
+		log.Infof("need repair list len is %d", len(list))
+		for _, item := range list {
+			content, err := s.ws.ChapterContent(item.Url)
+			if err != nil {
+				continue
+			}
+
+			if len(content) <= s.wsInfo.ShortContent {
+				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0)
+				continue
+			}
+			err = s.service.PutContent(item.ArticleId, item.ChapterId, content)
+			if err != nil {
+				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0)
+				continue
+			}
+			s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1)
+			log.Infof("repair success %s", item.Url)
+		}
+		time.Sleep(time.Minute * 10)
 	}
 }

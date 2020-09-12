@@ -38,6 +38,23 @@ type JieqiChapter struct {
 	Chaptertype  int
 }
 
+type ChapterErrorLog struct {
+	Id         int
+	Host       string
+	ArticleId  int
+	ChapterId  int
+	Url        string
+	ErrorType  int
+	RetryNum   int
+	Repair     int
+	CreateTime string
+	UpdateTime string
+}
+
+func (ChapterErrorLog) TableName() string {
+	return "chapter_error_log"
+}
+
 func (JieqiChapter) TableName() string {
 	return "jieqi_article_chapter"
 }

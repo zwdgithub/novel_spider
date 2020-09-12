@@ -1,16 +1,19 @@
 package test
 
 import (
+	"fmt"
 	"github.com/antchfx/htmlquery"
 	"novel_spider/article"
 	"novel_spider/bos_utils"
 	"novel_spider/db"
 	"novel_spider/log"
+	"novel_spider/model"
 	"novel_spider/redis"
 	"novel_spider/util"
 	"regexp"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestProcess(t *testing.T) {
@@ -187,4 +190,28 @@ func TestGenOpf(t *testing.T) {
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
 	service.GenOpf(37490)
+}
+
+func TestDeferFunc(t *testing.T) {
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	service.AddErrorChapter(
+		model.ChapterErrorLog{
+			Host:      "biquge.biz",
+			ArticleId: 30042,
+			ChapterId: 20222211,
+			Url:       "https://www.baidu.com",
+			ErrorType: 1,
+			RetryNum:  0,
+		},
+	)
+}
+
+func TestDate(t *testing.T) {
+	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
+	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
+	fmt.Println(n)
 }

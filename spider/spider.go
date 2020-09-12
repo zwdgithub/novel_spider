@@ -29,5 +29,7 @@ func main() {
 		return
 	}
 	spider := callResult[0].Interface().(*article.NovelSpider)
+	go spider.Repair()
+
 	spider.Consumer()
 }
