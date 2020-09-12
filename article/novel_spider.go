@@ -139,8 +139,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			return
 		}
 		local = newArticle
+		go s.service.GenOpf(local.Articleid)
 	}
-	defer s.service.GenOpf(local.Articleid)
+
 	allChapters, err := s.ws.ChapterList(content)
 	if err != nil || len(allChapters) == 0 {
 		log.Infof("process %s, parse chapter list error: %v", obj.Url, err)
@@ -187,6 +188,12 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		retry = false
 	}
 	addChapterNum := 0
+
+	defer func() {
+		if addChapterNum > 0 {
+			s.service.GenOpf(local.Articleid)
+		}
+	}()
 	for _, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("process %s stop", obj.Url)
