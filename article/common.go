@@ -30,7 +30,7 @@ func ParseArticleInfo(content string) (*Article, error) {
 	if index != -1 {
 		info.ArticleName = info.ArticleName[0:index]
 	}
-	index := strings.Index(info.ArticleName, "(")
+	index = strings.Index(info.ArticleName, "(")
 	if index != -1 {
 		info.ArticleName = info.ArticleName[0:index]
 	}
