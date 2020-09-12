@@ -85,9 +85,6 @@ func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
 	content = strings.ReplaceAll(content, "<br>", "\r\n")
 	content = strings.ReplaceAll(content, "<br/>", "\r\n")
 	content = strings.ReplaceAll(content, "<br >", "\r\n")
-	if len(content) < n.ShortContent {
-		return "", errors.New(fmt.Sprintf("short content, url: %s", url))
-	}
 	return content, err
 }
 

@@ -3,6 +3,7 @@ package article
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"novel_spider/db"
 	"novel_spider/log"
 	"novel_spider/model"
@@ -201,9 +202,14 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			log.Infof("process %s stop", obj.Url)
 			return
 		}
-		content, contentError := s.ws.ChapterContent(item.Url)
-		if contentError != nil {
-			log.Infof("process %s get content error: %v", obj.Url, contentError)
+		content, err := s.ws.ChapterContent(item.Url)
+		if err != nil {
+			log.Infof("process %s get content error: %v", obj.Url, err)
+			return
+		}
+		var contentError error
+		if len(content) <= s.wsInfo.ShortContent {
+			contentError = errors.New(fmt.Sprintf("process %s content short", obj.Url))
 			content = shortContent
 		}
 		chapter := &model.JieqiChapter{
