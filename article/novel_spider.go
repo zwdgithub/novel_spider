@@ -167,6 +167,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	for _, item := range allChapters {
 		if strings.Trim(item.ChapterName, " ") == strings.Trim(local.Lastchapter, " ") {
 			match = true
+			continue
 		}
 		if match {
 			newChapters = append(newChapters, item)
