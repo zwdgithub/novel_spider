@@ -147,6 +147,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			return
 		}
 		local = newArticle
+		log.Infof("process %s, add new article, %s, %s", obj.Url, local.Articlename, local.Author)
 		go s.service.GenOpf(local.Articleid)
 	}
 
