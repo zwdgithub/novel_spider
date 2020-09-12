@@ -42,6 +42,9 @@ func (n *BiqugeBiz) ArticleInfo(content string) (*Article, error) {
 	if v, ok := n.Category[article.Category]; ok {
 		article.SortId = v
 	}
+	if article.SortId == 0 {
+		article.SortId = 7
+	}
 	log.Infof("article info :%v", article)
 	return article, err
 }
