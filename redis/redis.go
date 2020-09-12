@@ -50,6 +50,7 @@ func (r *RedisUtil) CanParse(articleName, author string) (bool, error) {
 	}
 	p, err := r.conn.HGet(articleName+"|"+author, "parsing").Result()
 	if p == "1" {
+		r.conn.Del(key)
 		return false, nil
 	}
 	r.conn.HSet(articleName+"|"+author, "parsing", 1)
