@@ -76,7 +76,7 @@ func (n *BiqugeBiz) ChapterList(content string) ([]NewChapter, error) {
 }
 
 func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
-	content, err := util.Get(url, n.Encoding, n.Headers)
+	content, err := util.GetWithProxy(url, n.Encoding, n.Headers)
 	if err != nil {
 		return "", err
 	}
@@ -105,7 +105,7 @@ func (n *BiqugeBiz) Consumer() (string, error) {
 
 func (n *BiqugeBiz) NewList() ([]string, error) {
 	r := make([]string, 0)
-	content, err := util.Get(n.NewChapterListUrl, n.Encoding, n.Headers)
+	content, err := util.GetWithProxy(n.NewChapterListUrl, n.Encoding, n.Headers)
 	if err != nil {
 		return r, err
 	}
