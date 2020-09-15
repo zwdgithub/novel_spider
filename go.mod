@@ -17,7 +17,6 @@ require (
 	github.com/zwdgithub/simple_http v0.0.7
 	go.uber.org/zap v1.16.0
 	golang.org/x/text v0.3.2
-	golang.org/x/tools v0.0.0-20191029190741-b9c20aec41a5
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0
 )

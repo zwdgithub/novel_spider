@@ -20,6 +20,8 @@ func init() {
 
 func main() {
 	var w = flag.String("website", "CreateBiqugeBizSpider", "website reflect")
+	flag.Parse()
+	log.Infof("website: %s", *w)
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
 	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
 	dbConn := db.New(dbConf)
@@ -35,7 +37,7 @@ func main() {
 		return
 	}
 	spider := callResult[0].Interface().(*article.NovelSpider)
-	// spider.NewList()
+	spider.NewList()
 	cronTask := cron.New()
 	_, _ = cronTask.AddFunc("* * * * *", spider.NewList)
 	cronTask.Run()

@@ -13,7 +13,7 @@ import (
 func main() {
 	var w = flag.String("website", "CreateBiqugeBizSpider", "website reflect")
 	flag.Parse()
-
+	log.Infof("website: %s", *w)
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
 	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
 	dbConn := db.New(dbConf)

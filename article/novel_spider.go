@@ -214,6 +214,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			log.Infof("process %s get content error: %v", obj.Url, err)
 			return
 		}
+		log.Info(content)
 		var contentError error
 		if len(content) <= s.wsInfo.ShortContent {
 			contentError = errors.New(fmt.Sprintf("process %s content short", obj.Url))
