@@ -47,6 +47,7 @@ func (n *KanshuLa) ArticleInfo(content string) (*Article, error) {
 	if article.SortId == 0 {
 		article.SortId = 7
 	}
+	article.ImgUrl = n.Host + article.ImgUrl
 	log.Infof("article info :%v", article)
 	return article, err
 }
