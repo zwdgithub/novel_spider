@@ -10,7 +10,6 @@ import (
 	"novel_spider/redis"
 	"novel_spider/util"
 	"runtime"
-	"strings"
 	"time"
 )
 
@@ -173,11 +172,12 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	order := local.Chapters
 	newChapters := make([]NewChapter, 0)
 	match := false
+	local.Lastchapter = util.Trim(local.Lastchapter)
 	if local.Chapters == 0 {
 		match = true
 	}
 	for _, item := range allChapters {
-		if strings.Trim(item.ChapterName, " ") == strings.Trim(local.Lastchapter, " ") {
+		if item.ChapterName == local.Lastchapter {
 			match = true
 			continue
 		}
@@ -185,6 +185,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			newChapters = append(newChapters, item)
 		}
 	}
+	return
 	if !match {
 		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		return

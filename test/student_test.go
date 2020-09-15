@@ -223,11 +223,11 @@ func TestKanshuSpider(t *testing.T) {
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
-	spider := article.CreateKanshuLaSpider(service, redisConn, bosClient)
+	spider := article.CreateBiqugeBizSpider(service, redisConn, bosClient)
 	c := make(chan int, 1)
 	c <- 1
 	spider.Process(article.NewArticle{
-		Url:            "https://www.kanshu5.la/133/133537/",
+		Url:            "https://www.biquge.biz/37_37640/",
 		NewChapterName: "",
 	}, c)
 }
