@@ -1,6 +1,7 @@
 package db
 
 import (
+	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
 	"novel_spider/bos_utils"
@@ -114,4 +115,13 @@ func (service *ArticleService) UpdateErrorChapter(id, retry, repair int) {
 
 func (service *ArticleService) PutContent(aid, cid int, content string) error {
 	return service.bos.PutChapter(aid, cid, content)
+}
+
+func (service *ArticleService) LastSecondChapter(articleId int) (string, error) {
+	var list []model.JieqiChapter
+	service.db.Where("articleid = ?", articleId).Order("chapterorder desc").Limit(10).Find(&list)
+	if len(list) >= 2 {
+		return list[1].Chaptername, nil
+	}
+	return "", errors.New("service LastSecondChapter error")
 }

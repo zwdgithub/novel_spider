@@ -186,6 +186,23 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 	}
 	if !match {
+		log.Infof("process %s, try to match last second chapter")
+		second, err := s.service.LastSecondChapter(local.Articleid)
+		if err != nil {
+			log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
+		}
+		for _, item := range allChapters {
+			if item.ChapterName == second {
+				match = true
+				log.Infof("process %s, try to match last second chapter success")
+				continue
+			}
+			if match {
+				newChapters = append(newChapters, item)
+			}
+		}
+	}
+	if !match {
 		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		return
 	}
