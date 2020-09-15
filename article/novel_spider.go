@@ -194,7 +194,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		for _, item := range allChapters {
 			if item.ChapterName == second {
 				match = true
-				log.Infof("process %s, try to match last second chapter success")
+				log.Infof("process %s, try to match last second chapter success", obj.Url)
 				continue
 			}
 			if match {
