@@ -7,6 +7,7 @@ import (
 	"novel_spider/bos_utils"
 	"novel_spider/model"
 	"novel_spider/redis"
+	"novel_spider/util"
 	"time"
 )
 
@@ -121,7 +122,7 @@ func (service *ArticleService) LastSecondChapter(articleId int) (string, error) 
 	var list []model.JieqiChapter
 	service.db.Where("articleid = ?", articleId).Order("chapterorder desc").Limit(10).Find(&list)
 	if len(list) >= 2 {
-		return list[1].Chaptername, nil
+		return util.Trim(list[1].Chaptername), nil
 	}
 	return "", errors.New("service LastSecondChapter error")
 }
