@@ -216,3 +216,18 @@ func TestDate(t *testing.T) {
 	fmt.Println(n)
 	t.Log(util.ValidChapterName("123"))
 }
+
+func TestKanshuSpider(t *testing.T) {
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	spider := article.CreateKanshuLaSpider(service, redisConn, bosClient)
+	c := make(chan int, 1)
+	c <- 1
+	spider.Process(article.NewArticle{
+		Url:            "https://www.kanshu5.la/133/133537/",
+		NewChapterName: "",
+	}, c)
+}

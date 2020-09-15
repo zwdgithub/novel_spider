@@ -115,7 +115,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 	article, err := s.ws.ArticleInfo(content)
 	if err != nil || article == nil || article.ArticleName == "" || article.Author == "" {
-		log.Infof("process %s, parse article info error, ", obj.Url)
+		log.Infof("process %s, parse article info error, msg: %v", obj.Url, err)
 		return
 	}
 	canParse, err := s.CanParse(article.ArticleName, article.Author)

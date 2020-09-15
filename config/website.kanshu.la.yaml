@@ -1,0 +1,19 @@
+name: kanshu5.la
+host: https://www.kanshu5.la
+encoding: utf-8
+headers:
+  user-agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36
+category:
+  玄幻小说: 1
+  仙侠小说: 2
+  都市小说: 3
+  军史小说: 4
+  网游小说: 5
+  科幻小说: 6
+  其他小说: 7
+  恐怖小说: 7
+hasChapter: true
+concurrent: 2
+shortContent: 500
+newChapterListUrl: https://www.kanshu5.la
+proxy: false

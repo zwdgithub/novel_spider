@@ -13,13 +13,13 @@ import (
 
 func ParseArticleInfo(content string) (*Article, error) {
 	var info Article
-	reg := regexp.MustCompile(`<meta property="og:title" content="(.+?)"/>`)
+	reg := regexp.MustCompile(`<meta property="og:title" content="(.+?)"`)
 	title := reg.FindStringSubmatch(content)
 	if len(title) <= 1 {
 		return nil, errors.New("title find error")
 	}
 
-	reg = regexp.MustCompile(`<meta property="og:novel:author" content="(.+?)"/>`)
+	reg = regexp.MustCompile(`<meta property="og:novel:author" content="(.+?)"`)
 	author := reg.FindStringSubmatch(content)
 	if len(title) <= 1 {
 		return nil, errors.New("author find error")
@@ -34,18 +34,25 @@ func ParseArticleInfo(content string) (*Article, error) {
 	if index != -1 {
 		info.ArticleName = info.ArticleName[0:index]
 	}
-	reg = regexp.MustCompile(`<meta property="og:novel:category" content="(.+?)"/>`)
+	reg = regexp.MustCompile(`<meta property="og:novel:category" content="(.+?)"`)
 	category := reg.FindStringSubmatch(content)
 	if len(category) <= 1 {
 		return nil, errors.New("category find error")
 	}
 	info.Category = category[1]
-	reg = regexp.MustCompile(`<meta property="og:image" content="(.+?)"/>`)
+	reg = regexp.MustCompile(`<meta property="og:image" content="(.+?)"`)
 	img := reg.FindStringSubmatch(content)
 	if len(img) <= 1 {
 		return nil, errors.New("category find error")
 	}
 	info.ImgUrl = img[1]
+	reg = regexp.MustCompile(`<meta property="og:description" content="(.+?)"`)
+	intro := reg.FindStringSubmatch(content)
+	if len(intro) <= 1 {
+		info.Intro = ""
+	} else {
+		info.Intro = intro[1]
+	}
 	return &info, nil
 }
 

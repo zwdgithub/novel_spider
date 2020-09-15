@@ -10,21 +10,22 @@ import (
 	"novel_spider/log"
 	"novel_spider/redis"
 	"novel_spider/util"
+	"regexp"
 	"strings"
 	"time"
 )
 
-type XsbiqugeCom struct {
+type KanshuLa struct {
 	*NovelWebsite
 	service *db.ArticleService
 	redis   *redis.RedisUtil
 }
 
-func NewXsbiqugeCom(service *db.ArticleService, redis *redis.RedisUtil, bos *bos_utils.BosUtil) *XsbiqugeCom {
-	website := LoadNovelWebsite("config/website.xsbiquge.com.yaml")
+func NewKanshuLa(service *db.ArticleService, redis *redis.RedisUtil, bos *bos_utils.BosUtil) *KanshuLa {
+	website := LoadNovelWebsite("config/website.kanshu.la.yaml")
 	log.Info(website)
 	website.BosUtil = bos
-	c := &XsbiqugeCom{
+	c := &KanshuLa{
 		NovelWebsite: website,
 		service:      service,
 		redis:        redis,
@@ -35,7 +36,7 @@ func NewXsbiqugeCom(service *db.ArticleService, redis *redis.RedisUtil, bos *bos
 	return c
 }
 
-func (n *XsbiqugeCom) ArticleInfo(content string) (*Article, error) {
+func (n *KanshuLa) ArticleInfo(content string) (*Article, error) {
 	article, err := ParseArticleInfo(content)
 	if err != nil {
 		return nil, err
@@ -50,13 +51,13 @@ func (n *XsbiqugeCom) ArticleInfo(content string) (*Article, error) {
 	return article, err
 }
 
-func (n *XsbiqugeCom) ChapterList(content string) ([]NewChapter, error) {
+func (n *KanshuLa) ChapterList(content string) ([]NewChapter, error) {
 	newChapters := make([]NewChapter, 0)
 	doc, err := htmlquery.Parse(strings.NewReader(content))
 	if err != nil {
 		return newChapters, err
 	}
-	nodes := htmlquery.Find(doc, `//div[@id="list"]/dl/dd/a`)
+	nodes := htmlquery.Find(doc, `//div[@id="list"]/dl/dt[2]/following-sibling::dd/a`)
 	for _, item := range nodes {
 		temp := NewChapter{
 			Url:         n.Host + strings.Trim(htmlquery.SelectAttr(item, "href"), " "),
@@ -74,7 +75,7 @@ func (n *XsbiqugeCom) ChapterList(content string) ([]NewChapter, error) {
 	return newChapters, nil
 }
 
-func (n *XsbiqugeCom) ChapterContent(url string) (string, error) {
+func (n *KanshuLa) ChapterContent(url string) (string, error) {
 	content, err := util.GetWithProxy(url, n.Encoding, n.Headers)
 	if err != nil {
 		return "", err
@@ -91,7 +92,12 @@ func (n *XsbiqugeCom) ChapterContent(url string) (string, error) {
 		return "", errors.New("content is nil ")
 	}
 	content = htmlquery.OutputHTML(cNode, false)
-	content = strings.ReplaceAll(content, "readx()", "")
+	reg := regexp.MustCompile(`</p>([\w\W]*)<div align="center">`)
+	c := reg.FindStringSubmatch(content)
+	if len(c) <= 1 {
+		return "", errors.New("reg get content error")
+	}
+	content = c[1]
 	content = strings.ReplaceAll(content, " ", "")
 	content = strings.ReplaceAll(content, "<br>", "\r\n")
 	content = strings.ReplaceAll(content, "<br/>", "\r\n")
@@ -99,11 +105,11 @@ func (n *XsbiqugeCom) ChapterContent(url string) (string, error) {
 	return content, err
 }
 
-func (n *XsbiqugeCom) Consumer() (string, error) {
+func (n *KanshuLa) Consumer() (string, error) {
 	return n.redis.GetUrlFromQueue(n.Host)
 }
 
-func (n *XsbiqugeCom) NewList() ([]string, error) {
+func (n *KanshuLa) NewList() ([]string, error) {
 	r := make([]string, 0)
 	content, err := util.Get(n.NewChapterListUrl, n.Encoding, n.Headers)
 	if err != nil {
