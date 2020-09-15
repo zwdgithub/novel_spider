@@ -11,6 +11,7 @@ import (
 	"novel_spider/redis"
 	"novel_spider/util"
 	"strings"
+	"time"
 )
 
 type BiqugeBiz struct {
@@ -61,8 +62,12 @@ func (n *BiqugeBiz) ChapterList(content string) ([]NewChapter, error) {
 			Url:         n.Host + strings.Trim(htmlquery.SelectAttr(item, "href"), " "),
 			ChapterName: strings.Trim(htmlquery.InnerText(item), " "),
 		}
-		if temp.Url == "" || temp.ChapterName == "" {
+		if temp.Url == "" {
 			return newChapters, errors.New(fmt.Sprintf("url or chapterName is none, url:%s, chapterName: %s", temp.Url, temp.ChapterName))
+		}
+
+		if temp.ChapterName == "" {
+			temp.ChapterName = fmt.Sprintf("%d", time.Now().Unix())
 		}
 		newChapters = append(newChapters, temp)
 	}
