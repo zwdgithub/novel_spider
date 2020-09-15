@@ -185,7 +185,6 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			newChapters = append(newChapters, item)
 		}
 	}
-	return
 	if !match {
 		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		return
