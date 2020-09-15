@@ -83,6 +83,9 @@ func (n *BiqugeBiz) ChapterContent(url string) (string, error) {
 	if err != nil {
 		return "", errors.New("")
 	}
+	if cNode == nil {
+		return "", errors.New("content is nil ")
+	}
 	content = htmlquery.OutputHTML(cNode, false)
 	content = strings.ReplaceAll(content, " ", "")
 	content = strings.ReplaceAll(content, "<br>", "\r\n")
