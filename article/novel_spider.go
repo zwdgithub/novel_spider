@@ -140,6 +140,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			Intro:       article.Intro,
 			Sortid:      article.SortId,
 		}
+		if newArticle.Intro == "" {
+			newArticle.Intro = article.ArticleName
+		}
 		err := s.service.AddArticle(newArticle)
 		_ = s.wsInfo.BosUtil.PutCover(article.ImgUrl, newArticle.Articleid)
 		if err != nil {
@@ -211,7 +214,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 		content, err := s.ws.ChapterContent(item.Url)
 		if err != nil {
-			log.Infof("process %s get content error: %v", obj.Url, err)
+			log.Infof("process %s get content error: %v, add new chapter: %d", obj.Url, err, addChapterNum)
 			return
 		}
 		var contentError error

@@ -85,6 +85,7 @@ func GetWithProxy(url, encoding string, p ...interface{}) (string, error) {
 		}
 		content, err := ioutil.ReadAll(reader)
 		if err != nil {
+			time.Sleep(time.Second * 1)
 			continue
 		}
 		return string(content), nil
