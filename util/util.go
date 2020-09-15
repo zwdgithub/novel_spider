@@ -59,9 +59,9 @@ func Get(url, encoding string, p ...interface{}) (string, error) {
 
 func GetWithProxy(url, encoding string, p ...interface{}) (string, error) {
 	for i := 0; i <= 3; i++ {
-		//h := xhttp.NewHttpUtil()
+		h := xhttp.NewHttpUtil()
 		h.Get("http://localhost:8092/get?url=" + url)
-		h.Get(url)
+		//h.Get(url)
 		for _, item := range p {
 			switch v := item.(type) {
 			case Headers:
