@@ -10,6 +10,7 @@ import (
 	"novel_spider/redis"
 	"novel_spider/util"
 	"runtime"
+	"sync"
 	"time"
 )
 
@@ -38,6 +39,7 @@ type NewArticle struct {
 	Url            string
 	NewChapterName string
 	MaxChapterNum  int
+	Max            *sync.Map
 }
 
 type NewChapter struct {
@@ -64,7 +66,7 @@ func (s *NovelSpider) ParseEnd(articleName, author string) {
 
 func (s *NovelSpider) Consumer() {
 	c := make(chan int, s.wsInfo.Concurrent)
-	flag := 0
+	m := new(sync.Map)
 	for {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("%s, spider stop", s.wsInfo.Host)
@@ -81,13 +83,13 @@ func (s *NovelSpider) Consumer() {
 				continue
 			}
 			c <- 1
-			if flag%2 == 0 {
-				obj.MaxChapterNum = 10000
-				flag += 1
-			} else {
-				obj.MaxChapterNum = 100
-				flag -= 1
+			obj.MaxChapterNum = 100
+			if _, ok := m.Load("max"); !ok {
+				obj.MaxChapterNum = 100000
+				obj.Max = m
+				m.Store("max", "1")
 			}
+			obj.Max = m
 			go s.Process(obj, c)
 		}
 		time.Sleep(time.Second / 2)
@@ -101,6 +103,9 @@ func (s *NovelSpider) Consumer() {
 func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	defer func() {
 		<-c
+		if obj.MaxChapterNum == 100000 {
+			obj.Max.Delete("max")
+		}
 		if err := recover(); err != nil {
 			log.Errorf("process %s, err: %v", obj.Url, err)
 			stack := make([]byte, 1024*8)
