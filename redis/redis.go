@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
-	"novel_spider/log"
 	"sync"
 	"time"
 )
@@ -68,18 +67,13 @@ func (r *RedisUtil) ParseEnd(articleName, author string) {
 }
 
 func (r *RedisUtil) PutUrlToQueue(website, url string) {
-	log.Infof("PutUrlToQueue website: %s, url: %s", website, url)
 	key := fmt.Sprintf(NeedParseListKey, website)
 	v, err := r.conn.SAdd(website+"_set", url).Result()
-	log.Infof("PutUrlToQueue sadd result v: %d, err: %v", v, err)
 	if err != nil {
 		return
 	}
 	if v == 1 {
-		result := r.conn.LPush(key, url)
-		log.Infof("lpush result %v, %v, %v, %v", result.Name(), result.Val(), result.Err(), result.String())
-		e, v := result.Result()
-		log.Info(e, v)
+		r.conn.LPush(key, url)
 	}
 }
 

@@ -80,6 +80,7 @@ func (s *NovelSpider) Consumer() {
 			var obj NewArticle
 			err = json.Unmarshal([]byte(content), &obj)
 			if err != nil {
+				log.Error("consumer Unmarshal error:%v", err)
 				continue
 			}
 			c <- 1
@@ -229,8 +230,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 
 	if len(newChapters) > obj.MaxChapterNum {
-		s.redis.Retry(s.wsInfo.Host, obj.Url)
-		log.Infof("process %s, retry host: %s, url: %s", obj.Url, s.wsInfo.Host, obj.Url)
+		s.retry(s.wsInfo.Host, obj.Url)
 		log.Infof("process %s, need crawl chapter too many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
 		return
 	}
@@ -280,7 +280,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			})
 		}
 		if err != nil {
-			s.redis.Retry(s.wsInfo.Host, obj.Url)
+			s.retry(s.wsInfo.Host, obj.Url)
 			log.Infof("process %s add chapter error: %v", obj.Url, err)
 			return
 		}
@@ -294,7 +294,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 
 	if retry {
 		log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
-		s.redis.Retry(s.wsInfo.Host, obj.Url)
+		s.retry(s.wsInfo.Host, obj.Url)
 	}
 	return
 }
@@ -341,4 +341,12 @@ func (s *NovelSpider) Repair() {
 		}
 		time.Sleep(time.Minute * 10)
 	}
+}
+
+func (s *NovelSpider) retry(host, url string) {
+	b, _ := json.Marshal(NewArticle{
+		Url:            url,
+		NewChapterName: "",
+	})
+	s.redis.PutUrlToQueue(s.wsInfo.Host, string(b))
 }
