@@ -121,9 +121,5 @@ func ValidChapterName(chapterName string) bool {
 }
 
 func Trim(s string) string {
-	s = strings.Trim(s, " ")
-	s = strings.Trim(s, "\r")
-	s = strings.Trim(s, "\n")
-	s = strings.Trim(s, "\t")
-	return s
+	return strings.TrimSpace(s)
 }
