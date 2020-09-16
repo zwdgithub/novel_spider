@@ -120,7 +120,7 @@ func (service *ArticleService) PutContent(aid, cid int, content string) error {
 
 func (service *ArticleService) LastSecondChapter(articleId int) (string, error) {
 	var list []model.JieqiChapter
-	service.db.Where("articleid = ?", articleId).Order("chapterorder desc").Limit(10).Find(&list)
+	service.db.Where("articleid = ?", articleId).Order("chapterorder desc, chapterid desc").Limit(10).Find(&list)
 	if len(list) >= 2 {
 		return util.Trim(list[1].Chaptername), nil
 	}
