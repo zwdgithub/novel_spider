@@ -76,7 +76,8 @@ func (r *RedisUtil) PutUrlToQueue(website, url string) {
 		return
 	}
 	if v == 1 {
-		r.conn.LPush(key, url)
+		result := r.conn.LPush(key, url)
+		log.Infof("lpush result %v", result)
 	}
 }
 
