@@ -193,6 +193,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		}
 		for _, item := range allChapters {
+			log.Infof(">%s, %s<", item.ChapterName, second)
 			if item.ChapterName == second {
 				match = true
 				log.Infof("process %s, try to match last second chapter success", obj.Url)
