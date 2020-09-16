@@ -230,7 +230,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 
 	if len(newChapters) > obj.MaxChapterNum {
 		s.redis.Retry(s.wsInfo.Host, obj.Url)
-		log.Infof("process %s, need crawl chapter to many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
+		log.Infof("process %s, need crawl chapter too many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
 		return
 	}
 
