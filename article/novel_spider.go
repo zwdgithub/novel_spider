@@ -37,6 +37,7 @@ type NovelSpider struct {
 type NewArticle struct {
 	Url            string
 	NewChapterName string
+	MaxChapterNum  int
 }
 
 type NewChapter struct {
@@ -63,6 +64,7 @@ func (s *NovelSpider) ParseEnd(articleName, author string) {
 
 func (s *NovelSpider) Consumer() {
 	c := make(chan int, s.wsInfo.Concurrent)
+	flag := 0
 	for {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("%s, spider stop", s.wsInfo.Host)
@@ -79,6 +81,13 @@ func (s *NovelSpider) Consumer() {
 				continue
 			}
 			c <- 1
+			if flag%2 == 0 {
+				obj.MaxChapterNum = 10000
+				flag += 1
+			} else {
+				obj.MaxChapterNum = 100
+				flag -= 1
+			}
 			go s.Process(obj, c)
 		}
 		time.Sleep(time.Second / 2)
@@ -214,6 +223,12 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		return
 	}
 
+	if len(newChapters) > obj.MaxChapterNum {
+		s.redis.Retry(s.wsInfo.Host, obj.Url)
+		log.Infof("process %s, need crawl chapter to many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
+		return
+	}
+
 	retry := true
 	if obj.NewChapterName != "" {
 		retry = false
@@ -225,7 +240,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			s.service.GenOpf(local.Articleid)
 		}
 	}()
-	for _, item := range newChapters {
+	for i, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("process %s stop", obj.Url)
 			return
