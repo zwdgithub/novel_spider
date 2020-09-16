@@ -310,8 +310,9 @@ func (s *NovelSpider) NewList() {
 }
 
 func (s *NovelSpider) Repair() {
+	offset := 0
 	for {
-		list := s.service.NeedRepairChapterList(s.wsInfo.Host)
+		list := s.service.NeedRepairChapterList(s.wsInfo.Host, offset)
 		log.Infof("repair, need repair list len is %d", len(list))
 		for _, item := range list {
 			content, err := s.ws.ChapterContent(item.Url)
@@ -331,6 +332,12 @@ func (s *NovelSpider) Repair() {
 			}
 			s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1)
 			log.Infof("repair success %s", item.Url)
+		}
+		if len(list) == 100 {
+			offset += 100
+			continue
+		} else {
+			offset = 0
 		}
 		time.Sleep(time.Minute * 10)
 	}
