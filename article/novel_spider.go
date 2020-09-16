@@ -245,7 +245,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			s.service.GenOpf(local.Articleid)
 		}
 	}()
-	for i, item := range newChapters {
+	for _, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("process %s stop", obj.Url)
 			return
