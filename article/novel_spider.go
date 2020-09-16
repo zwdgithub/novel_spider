@@ -177,6 +177,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		match = true
 	}
 	for _, item := range allChapters {
+		log.Infof(">%s, %s <", item.ChapterName, local.Lastchapter)
 		if item.ChapterName == local.Lastchapter {
 			match = true
 			continue
