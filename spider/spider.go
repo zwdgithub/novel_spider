@@ -8,6 +8,7 @@ import (
 	"novel_spider/log"
 	"novel_spider/redis"
 	"reflect"
+	"time"
 )
 
 func main() {
@@ -42,4 +43,6 @@ func main() {
 	go spider.Repair()
 
 	spider.Consumer()
+
+	time.Sleep(time.Second * 10)
 }

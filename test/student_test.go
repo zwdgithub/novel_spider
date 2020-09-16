@@ -234,7 +234,7 @@ func TestKanshuSpider(t *testing.T) {
 
 func TestStr(t *testing.T) {
 	s := `第095章 少年姬景淮
-                                    `
+ `
 
 	s = util.Trim(s)
 	fmt.Println(s)
