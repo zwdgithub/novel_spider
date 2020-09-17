@@ -80,6 +80,7 @@ func (r *RedisUtil) PutUrlToQueue(website, url string) {
 func (r *RedisUtil) Retry(website, url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
+	website += "_many_chapters"
 	r.PutUrlToQueue(website, url)
 }
 

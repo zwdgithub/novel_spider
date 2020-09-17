@@ -10,7 +10,6 @@ import (
 	"novel_spider/redis"
 	"novel_spider/util"
 	"runtime"
-	"sync"
 	"time"
 )
 
@@ -25,6 +24,7 @@ type NovelWebsites interface {
 	ChapterList(content string) ([]NewChapter, error)
 	ChapterContent(chapterUrl string) (string, error)
 	Consumer() (string, error)
+	ConsumerMany() (string, error)
 	NewList() ([]string, error)
 }
 
@@ -39,7 +39,6 @@ type NewArticle struct {
 	Url            string
 	NewChapterName string
 	MaxChapterNum  int
-	Max            *sync.Map
 }
 
 type NewChapter struct {
@@ -64,33 +63,36 @@ func (s *NovelSpider) ParseEnd(articleName, author string) {
 	s.redis.ParseEnd(articleName, author)
 }
 
-func (s *NovelSpider) Consumer() {
+func (s *NovelSpider) Consumer(many bool) {
 	c := make(chan int, s.wsInfo.Concurrent)
-	m := new(sync.Map)
 	for {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("%s, spider stop", s.wsInfo.Host)
 			break
 		}
+		var content string
+		var err error
 		if len(c) < s.wsInfo.Concurrent {
-			content, err := s.ws.Consumer()
+			if many {
+				content, err = s.ws.ConsumerMany()
+			} else {
+				content, err = s.ws.Consumer()
+			}
 			if err != nil {
 				time.Sleep(time.Second * 5)
+				continue
 			}
 			var obj NewArticle
 			err = json.Unmarshal([]byte(content), &obj)
 			if err != nil {
-				log.Error("consumer Unmarshal error:%v", err)
+				log.Errorf("consumer Unmarshal error:%v, value: %s", err, content)
 				continue
 			}
 			c <- 1
 			obj.MaxChapterNum = 100
-			if _, ok := m.Load("max"); !ok {
+			if many {
 				obj.MaxChapterNum = 100000
-				obj.Max = m
-				m.Store("max", "1")
 			}
-			obj.Max = m
 			go s.Process(obj, c)
 		}
 		time.Sleep(time.Second / 2)
@@ -104,9 +106,6 @@ func (s *NovelSpider) Consumer() {
 func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	defer func() {
 		<-c
-		if obj.MaxChapterNum == 100000 {
-			obj.Max.Delete("max")
-		}
 		if err := recover(); err != nil {
 			log.Errorf("process %s, err: %v", obj.Url, err)
 			stack := make([]byte, 1024*8)
@@ -348,5 +347,5 @@ func (s *NovelSpider) retry(host, url string) {
 		Url:            url,
 		NewChapterName: "",
 	})
-	s.redis.PutUrlToQueue(s.wsInfo.Host, string(b))
+	s.redis.Retry(s.wsInfo.Host, string(b))
 }

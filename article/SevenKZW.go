@@ -109,6 +109,10 @@ func (n *SevenKZW) Consumer() (string, error) {
 	return n.redis.GetUrlFromQueue(n.Host)
 }
 
+func (n *SevenKZW) ConsumerMany() (string, error) {
+	return n.redis.GetUrlFromQueue(n.Host + "_many_chapters")
+}
+
 func (n *SevenKZW) NewList() ([]string, error) {
 	r := make([]string, 0)
 	return r, nil

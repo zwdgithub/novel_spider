@@ -41,8 +41,8 @@ func main() {
 		return
 	}
 	go spider.Repair()
-
-	spider.Consumer()
+	go spider.Consumer(true)
+	spider.Consumer(false)
 
 	time.Sleep(time.Second * 10)
 }

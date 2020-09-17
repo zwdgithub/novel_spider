@@ -110,6 +110,10 @@ func (n *KanshuLa) Consumer() (string, error) {
 	return n.redis.GetUrlFromQueue(n.Host)
 }
 
+func (n *KanshuLa) ConsumerMany() (string, error) {
+	return n.redis.GetUrlFromQueue(n.Host + "_many_chapters")
+}
+
 func (n *KanshuLa) NewList() ([]string, error) {
 	r := make([]string, 0)
 	content, err := util.Get(n.NewChapterListUrl, n.Encoding, n.Headers)

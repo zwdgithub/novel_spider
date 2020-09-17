@@ -103,6 +103,10 @@ func (n *BiqugeBiz) Consumer() (string, error) {
 	return n.redis.GetUrlFromQueue(n.Host)
 }
 
+func (n *BiqugeBiz) ConsumerMany() (string, error) {
+	return n.redis.GetUrlFromQueue(n.Host + "_many_chapters")
+}
+
 func (n *BiqugeBiz) NewList() ([]string, error) {
 	r := make([]string, 0)
 	content, err := util.GetWithProxy(n.NewChapterListUrl, n.Encoding, n.Headers)
