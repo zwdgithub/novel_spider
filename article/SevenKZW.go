@@ -75,7 +75,7 @@ func (n *SevenKZW) ChapterList(content string) ([]NewChapter, error) {
 }
 
 func (n *SevenKZW) ChapterContent(url string) (string, error) {
-	content, err := util.Get(url, n.Encoding, n.Headers)
+	content, err := util.GetWithProxy(url, n.Encoding, n.Headers)
 	if err != nil {
 		return "", err
 	}
