@@ -76,7 +76,7 @@ func (n *SevenKZW) ChapterList(content string) ([]NewChapter, error) {
 }
 
 func (n *SevenKZW) ChapterContent(url string) (string, error) {
-	content, err := util.GetWithProxy(url, n.Encoding, n.Headers)
+	content, err := util.Get(url, n.Encoding, n.Headers)
 	if err != nil {
 		return "", err
 	}
@@ -92,12 +92,14 @@ func (n *SevenKZW) ChapterContent(url string) (string, error) {
 		return "", errors.New("content is nil ")
 	}
 	content = htmlquery.OutputHTML(cNode, false)
-	reg := regexp.MustCompile(`</p>([\w\W]*)<div align="center">`)
+	reg := regexp.MustCompile(`([\w\W]*)<p style="font-size:16px;">`)
 	c := reg.FindStringSubmatch(content)
 	if len(c) <= 1 {
 		return "", errors.New("reg get content error")
 	}
 	content = c[1]
+	content = strings.ReplaceAll(content, "<a href=\"https://www.7kzw.com\">https://www.7kzw.com</a>", "")
+	content = strings.ReplaceAll(content, "https://www.7kzw.com", "")
 	content = strings.ReplaceAll(content, " ", "")
 	content = strings.ReplaceAll(content, "<br>", "\r\n")
 	content = strings.ReplaceAll(content, "<br/>", "\r\n")
