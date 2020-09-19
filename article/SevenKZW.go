@@ -62,7 +62,6 @@ func (n *SevenKZW) ChapterList(content string) ([]NewChapter, error) {
 			Url:         n.Host + strings.Trim(htmlquery.SelectAttr(item, "href"), " "),
 			ChapterName: util.Trim(htmlquery.InnerText(item)),
 		}
-		fmt.Println(temp.ChapterName)
 		if temp.Url == "" {
 			return newChapters, errors.New(fmt.Sprintf("url or chapterName is none, url:%s, chapterName: %s", temp.Url, temp.ChapterName))
 		}
