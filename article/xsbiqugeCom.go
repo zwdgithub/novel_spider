@@ -88,7 +88,7 @@ func (n *XsbiqugeCom) ChapterContent(url string) (string, error) {
 		return "", errors.New("")
 	}
 	if cNode == nil {
-		return "", errors.New("content is nil ")
+		return content, errors.New("content is nil ")
 	}
 	content = htmlquery.OutputHTML(cNode, false)
 	content = strings.ReplaceAll(content, "readx()", "")

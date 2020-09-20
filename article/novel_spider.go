@@ -252,7 +252,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 		content, err := s.ws.ChapterContent(item.Url)
 		if err != nil {
-			log.Infof("process %s get content error: %v, add new chapter: %d", obj.Url, err, addChapterNum)
+			log.Infof("process %s get content error: %v, content is %s, add new chapter: %d", obj.Url, err, content, addChapterNum)
 			return
 		}
 		var contentError error

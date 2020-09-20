@@ -88,7 +88,7 @@ func (n *SevenKZW) ChapterContent(url string) (string, error) {
 		return "", errors.New("")
 	}
 	if cNode == nil {
-		return "", errors.New("content is nil ")
+		return content, errors.New("content is nil ")
 	}
 	content = htmlquery.OutputHTML(cNode, false)
 	reg := regexp.MustCompile(`([\w\W]*)<p style="font-size:16px;">`)

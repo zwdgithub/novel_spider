@@ -90,7 +90,7 @@ func (n *KanshuLa) ChapterContent(url string) (string, error) {
 		return "", errors.New("")
 	}
 	if cNode == nil {
-		return "", errors.New("content is nil ")
+		return content, errors.New("content is nil ")
 	}
 	content = htmlquery.OutputHTML(cNode, false)
 	reg := regexp.MustCompile(`</p>([\w\W]*)<div align="center">`)
