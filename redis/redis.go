@@ -94,5 +94,6 @@ func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {
 		return "", errors.New("do not have some url to parse")
 	}
 	r.conn.SRem(website+"_set", v[1])
+	r.conn.SRem("need_parse_list_"+website+"_set", v[1])
 	return v[1], nil
 }
