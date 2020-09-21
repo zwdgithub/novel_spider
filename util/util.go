@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strings"
@@ -86,6 +87,40 @@ func GetWithProxy(url, encoding string, p ...interface{}) (string, error) {
 		content, err := ioutil.ReadAll(reader)
 		if err != nil {
 			time.Sleep(time.Second * 1)
+			continue
+		}
+		return string(content), nil
+	}
+	return "", errors.New(fmt.Sprintf("http get %s error ", url))
+}
+
+func PostForm(url, encoding string, params url.Values, p ...interface{}) (string, error) {
+	for i := 0; i <= 3; i++ {
+		h := xhttp.NewHttpUtil()
+		h.PostForm(url, params)
+		for _, item := range p {
+			switch v := item.(type) {
+			case Headers:
+				h.SetHeader(v)
+			case func(c *http.Client) *http.Client:
+				h.CustomClient(v)
+			}
+		}
+		h.Do()
+
+		if h.Error() != nil {
+			time.Sleep(time.Second * 5)
+			continue
+		}
+		response := h.Response()
+		defer response.Body.Close()
+		var reader io.Reader
+		reader = response.Body
+		if encoding == EncodingGBK {
+			reader = transform.NewReader(response.Body, simplifiedchinese.GBK.NewDecoder())
+		}
+		content, err := ioutil.ReadAll(reader)
+		if err != nil {
 			continue
 		}
 		return string(content), nil

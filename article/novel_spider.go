@@ -245,7 +245,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			s.service.GenOpf(local.Articleid)
 		}
 	}()
-	for _, item := range newChapters {
+	for i, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("process %s stop", obj.Url)
 			return
@@ -287,6 +287,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		order += 1
 		if obj.NewChapterName != "" && obj.NewChapterName == item.ChapterName {
 			retry = false
+		}
+		if i == len(newChapters)-1 {
+
 		}
 	}
 	log.Infof("process %s, success, add %d chapter", obj.Url, addChapterNum)
