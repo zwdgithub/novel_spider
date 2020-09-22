@@ -131,3 +131,15 @@ func (service *ArticleService) LastSecondChapter(articleId int) (string, error) 
 	}
 	return "", errors.New("service LastSecondChapter error")
 }
+
+func (service *ArticleService) LoadAllArticle() []*model.JieqiArticle {
+	var list []*model.JieqiArticle
+	service.db.Order("id asc").Find(&list)
+	return list
+}
+
+func (service *ArticleService) LoadPreChapter10(aid int) []*model.JieqiChapter {
+	var list []*model.JieqiChapter
+	service.db.Where("articleid = ?", aid).Order("chapterid asc").Limit(10).Find(&list)
+	return list
+}

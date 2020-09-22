@@ -294,7 +294,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 	log.Infof("process %s, success, add %d chapter", obj.Url, addChapterNum)
 
-	if retry {
+	if obj.NewChapterName != "" && retry {
 		log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
 		s.retry(s.wsInfo.Host, obj.Url)
 	}
