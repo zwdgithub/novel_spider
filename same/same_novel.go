@@ -76,7 +76,7 @@ func main() {
 	list := service.LoadAllArticle()
 	log.Infof("list len is %d", len(list))
 	wg := &sync.WaitGroup{}
-	wg.Add(100)
+	wg.Add(10)
 	for _, item := range list {
 		go loadPre10(item, service, bosClient, wg)
 	}
