@@ -23,6 +23,7 @@ func isExist(f string) bool {
 }
 
 func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_utils.BosUtil) {
+	log.Info("process article id %d", item.Articleid)
 	cList := service.LoadPreChapter10(item.Articleid)
 	for _, c := range cList {
 		b, err := bos.GetChapter(c.Articleid, c.Chapterid)
@@ -59,8 +60,8 @@ func main() {
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
-
 	list := service.LoadAllArticle()
+	log.Info("list len is %d", len(list))
 	for _, item := range list {
 		loadPre10(item, service, bosClient)
 		return
