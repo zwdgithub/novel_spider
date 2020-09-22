@@ -14,7 +14,6 @@ import (
 	"novel_spider/redis"
 	"os"
 	"sync"
-	"time"
 )
 
 const (
@@ -31,7 +30,7 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 	defer func() {
 		wg.Done()
 	}()
-	log.Info("process article id %d", item.Articleid)
+	log.Infof("process article id %d", item.Articleid)
 	cList := service.LoadPreChapter10(item.Articleid)
 	for _, c := range cList {
 		b, err := bos.GetChapter(c.Articleid, c.Chapterid)
@@ -80,8 +79,6 @@ func main() {
 	wg.Add(100)
 	for _, item := range list {
 		go loadPre10(item, service, bosClient, wg)
-		time.Sleep(time.Second * 10)
-		return
 	}
 	wg.Wait()
 }
