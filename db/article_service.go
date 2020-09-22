@@ -140,6 +140,6 @@ func (service *ArticleService) LoadAllArticle() []*model.JieqiArticle {
 
 func (service *ArticleService) LoadPreChapter10(aid int) []*model.JieqiChapter {
 	var list []*model.JieqiChapter
-	service.db.Where("articleid = ?", aid).Order("chapterid asc").Limit(10).Find(&list)
+	service.db.Where("articleid = ? and chaptertype = 0", aid).Order("chapterid asc").Limit(10).Find(&list)
 	return list
 }

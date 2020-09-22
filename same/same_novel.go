@@ -29,6 +29,10 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 	log.Infof("process article id %d", item.Articleid)
 	cList := service.LoadPreChapter10(item.Articleid)
 	for _, c := range cList {
+		fileName := fmt.Sprintf(localFile, c.Articleid, c.Chapterid)
+		if isExist(fileName) {
+			continue
+		}
 		b, err := bos.GetChapter(c.Articleid, c.Chapterid)
 		if err != nil {
 			log.Error("chapter get error aid: %d, cid: %d", c.Articleid, c.Chapterid)
@@ -48,7 +52,7 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 				return
 			}
 		}
-		fileName := fmt.Sprintf(localFile, c.Articleid, c.Chapterid)
+
 		if !isExist(fileName) {
 			f, err := os.Create(fileName)
 			if err != nil {
