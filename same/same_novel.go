@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
 	"io/ioutil"
 	"novel_spider/bos_utils"
 	"novel_spider/db"
@@ -10,6 +13,7 @@ import (
 	"novel_spider/model"
 	"novel_spider/redis"
 	"os"
+	"sync"
 )
 
 const (
@@ -22,7 +26,10 @@ func isExist(f string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_utils.BosUtil) {
+func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_utils.BosUtil, wg *sync.WaitGroup) {
+	defer func() {
+		wg.Done()
+	}()
 	log.Info("process article id %d", item.Articleid)
 	cList := service.LoadPreChapter10(item.Articleid)
 	for _, c := range cList {
@@ -30,6 +37,12 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 		if err != nil {
 			log.Error("chapter get error aid: %d, cid: %d", c.Articleid, c.Chapterid)
 			continue
+		}
+		r := transform.NewReader(bytes.NewReader(b), simplifiedchinese.GBK.NewDecoder())
+		b, err = ioutil.ReadAll(r)
+		if err != nil {
+			log.Infof("trans gbk error, aid: %d, cid: %d", c.Articleid, c.Chapterid)
+			return
 		}
 		path := fmt.Sprintf(localPath, item.Articleid)
 		if !isExist(path) {
@@ -62,8 +75,11 @@ func main() {
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
 	list := service.LoadAllArticle()
 	log.Infof("list len is %d", len(list))
+	wg := &sync.WaitGroup{}
+	wg.Add(100)
 	for _, item := range list {
-		loadPre10(item, service, bosClient)
+		go loadPre10(item, service, bosClient, wg)
 		return
 	}
+	wg.Wait()
 }
