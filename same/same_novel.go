@@ -13,7 +13,6 @@ import (
 	"novel_spider/model"
 	"novel_spider/redis"
 	"os"
-	"sync"
 )
 
 const (
@@ -26,10 +25,7 @@ func isExist(f string) bool {
 	return err == nil || os.IsExist(err)
 }
 
-func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_utils.BosUtil, wg *sync.WaitGroup) {
-	defer func() {
-		wg.Done()
-	}()
+func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_utils.BosUtil) {
 	log.Infof("process article id %d", item.Articleid)
 	cList := service.LoadPreChapter10(item.Articleid)
 	for _, c := range cList {
@@ -75,10 +71,7 @@ func main() {
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
 	list := service.LoadAllArticle()
 	log.Infof("list len is %d", len(list))
-	wg := &sync.WaitGroup{}
-	wg.Add(10)
 	for _, item := range list {
-		go loadPre10(item, service, bosClient, wg)
+		loadPre10(item, service, bosClient)
 	}
-	wg.Wait()
 }
