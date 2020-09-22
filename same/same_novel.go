@@ -61,7 +61,7 @@ func main() {
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
 	list := service.LoadAllArticle()
-	log.Info("list len is %d", len(list))
+	log.Infof("list len is %d", len(list))
 	for _, item := range list {
 		loadPre10(item, service, bosClient)
 		return
