@@ -134,7 +134,7 @@ func (service *ArticleService) LastSecondChapter(articleId int) (string, error) 
 
 func (service *ArticleService) LoadAllArticle() []*model.JieqiArticle {
 	var list []*model.JieqiArticle
-	service.db.Select("id").Order("articleid asc").Find(&list)
+	service.db.Select("articleid").Order("articleid asc").Find(&list)
 	return list
 }
 
