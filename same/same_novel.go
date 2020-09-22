@@ -14,6 +14,7 @@ import (
 	"novel_spider/redis"
 	"os"
 	"sync"
+	"time"
 )
 
 const (
@@ -79,6 +80,7 @@ func main() {
 	wg.Add(100)
 	for _, item := range list {
 		go loadPre10(item, service, bosClient, wg)
+		time.Sleep(time.Second * 10)
 		return
 	}
 	wg.Wait()
