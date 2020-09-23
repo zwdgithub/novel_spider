@@ -16,6 +16,7 @@ func init() {
 	methods["CreateKanshuLaSpider"] = CreateKanshuLaSpider
 	methods["CreateSevenKZWComSpider"] = CreateSevenKZWComSpider
 	methods["CreateAikantxtLaSpider"] = CreateAikantxtLaSpider
+	methods["CreateXhxswzComSpider"] = CreateXhxswzComSpider
 }
 
 func CreateBiqugeBizSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
@@ -40,6 +41,11 @@ func CreateSevenKZWComSpider(service *db.ArticleService, redisConn *redis.RedisU
 
 func CreateAikantxtLaSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
 	website := NewAikantxtLa(service, redisConn, bosClient)
+	return NewNovelSpider(website, website.NovelWebsite, service, redisConn)
+}
+
+func CreateXhxswzComSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
+	website := NewXhxswzCom(service, redisConn, bosClient)
 	return NewNovelSpider(website, website.NovelWebsite, service, redisConn)
 }
 

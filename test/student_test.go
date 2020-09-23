@@ -239,3 +239,51 @@ func TestStr(t *testing.T) {
 	s = util.Trim(s)
 	fmt.Println(s)
 }
+
+func TestSevenKZWSpider(t *testing.T) {
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	spider := article.CreateSevenKZWComSpider(service, redisConn, bosClient)
+	c := make(chan int, 1)
+	c <- 1
+	spider.Process(article.NewArticle{
+		Url:            "https://www.7kzw.com/35/35445/",
+		NewChapterName: "",
+		MaxChapterNum:  10000,
+	}, c)
+}
+
+func TestAikantxtLaSpider(t *testing.T) {
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	spider := article.CreateAikantxtLaSpider(service, redisConn, bosClient)
+	c := make(chan int, 1)
+	c <- 1
+	spider.Process(article.NewArticle{
+		Url:            "https://www.aikantxt.la/aikan28861/",
+		NewChapterName: "",
+		MaxChapterNum:  10000,
+	}, c)
+}
+
+func TestXhxswzComSpider(t *testing.T) {
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	spider := article.CreateXhxswzComSpider(service, redisConn, bosClient)
+	c := make(chan int, 1)
+	c <- 1
+	spider.Process(article.NewArticle{
+		Url:            "http://www.xhxswz.com/go/17940/",
+		NewChapterName: "",
+		MaxChapterNum:  10000,
+	}, c)
+}

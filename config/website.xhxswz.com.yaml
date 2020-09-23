@@ -1,0 +1,18 @@
+name: xhxswz.com
+host: http://www.xhxswz.com
+encoding: GBK
+headers:
+  user-agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36
+category:
+  玄幻奇幻: 1
+  武侠仙侠: 2
+  都市言情: 3
+  女频频道: 8
+  历史军事: 4
+  网游竞技: 5
+  科幻灵异: 6
+hasChapter: true
+concurrent: 2
+shortContent: 500
+newChapterListUrl: http://www.xhxswz.com/all.html
+proxy: false
