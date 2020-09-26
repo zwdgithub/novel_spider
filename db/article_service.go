@@ -178,6 +178,5 @@ func (service *ArticleService) RepairSyncSameAll(articleId int) {
 				log.Infof("repair article: %d, sync article: %d, chapter: %d", articleId, c.Articleid, c.Chapterid)
 			}
 		}
-		return
 	}
 }
