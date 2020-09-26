@@ -1,9 +1,13 @@
 package db
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/jinzhu/gorm"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
+	"io/ioutil"
 	"novel_spider/bos_utils"
 	"novel_spider/log"
 	"novel_spider/model"
@@ -158,7 +162,14 @@ func (service *ArticleService) RepairSyncSameAll(articleId int) {
 				if err != nil {
 					continue
 				}
-				_ = service.bos.PutChapter(c.Articleid, c.Chapterid, string(b))
+				r := transform.NewReader(bytes.NewReader(b), simplifiedchinese.GBK.NewDecoder())
+				b, err = ioutil.ReadAll(r)
+				if err != nil {
+					log.Infof("trans gbk error, aid: %d, cid: %d", c.Articleid, c.Chapterid)
+					return
+				}
+				content := string(b)
+				_ = service.bos.PutChapter(c.Articleid, c.Chapterid, content)
 				log.Infof("repair article: %d, sync article: %d, chapter: %d", articleId, c.Articleid, c.Chapterid)
 			}
 		}
