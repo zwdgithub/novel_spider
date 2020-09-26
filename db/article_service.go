@@ -169,7 +169,12 @@ func (service *ArticleService) RepairSyncSameAll(articleId int) {
 					return
 				}
 				content := string(b)
-				_ = service.bos.PutChapter(c.Articleid, c.Chapterid, content)
+				err = service.bos.PutChapter(c.Articleid, c.Chapterid, content)
+				if err == nil {
+					service.db.Model(&model.JieqiChapter{}).Where("chapterid = ?", c.Chapterid).Updates(map[string]interface{}{
+						"size": len(content),
+					})
+				}
 				log.Infof("repair article: %d, sync article: %d, chapter: %d", articleId, c.Articleid, c.Chapterid)
 			}
 		}
