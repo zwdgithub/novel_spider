@@ -169,20 +169,17 @@ func (n *XhxswzCom) NewList() ([]string, error) {
 	if err != nil {
 		return r, err
 	}
-	liList := htmlquery.Find(doc, `//div[@id="newscontent"]/div[1]/ul/li`)
+	liList := htmlquery.Find(doc, `//div[@class="bookbox"]`)
 	for _, item := range liList {
-		articleInfo := htmlquery.Find(item, `./span[@class="s2"]/a`)
-		newChapter := htmlquery.Find(item, `./span[@class="s3"]/a`)
-		authorInfo := htmlquery.Find(item, `./span[@class="s4"]`)
+		articleInfo := htmlquery.Find(item, `.//h4[@class="bookname"]/a`)
+		newChapter := htmlquery.Find(item, `.//div[@class="cat"]/a`)
+		authorInfo := htmlquery.Find(item, `.//div[@class="author"][1]`)
 		if len(articleInfo) == 0 || len(newChapter) == 0 || len(authorInfo) == 0 {
 			return r, errors.New("new list find article or chapter is none")
 		}
 		href := htmlquery.SelectAttr(articleInfo[0], "href")
-		if strings.Contains(href, "id") {
-			continue
-		}
 		articleName := htmlquery.InnerText(articleInfo[0])
-		author := htmlquery.InnerText(authorInfo[0])
+		author := strings.ReplaceAll(htmlquery.InnerText(authorInfo[0]), "作者：", "")
 		newChapterName := htmlquery.InnerText(newChapter[0])
 		if href == "" || newChapterName == "" {
 			return r, errors.New("new list find articleName or chapterName is blank")

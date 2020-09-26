@@ -333,6 +333,7 @@ func (s *NovelSpider) Repair() {
 				continue
 			}
 			s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1)
+			s.service.RepairSyncSameAll(item.ArticleId)
 			log.Infof("repair success %s", item.Url)
 		}
 		if len(list) == 100 {

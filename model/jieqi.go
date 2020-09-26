@@ -51,6 +51,15 @@ type ChapterErrorLog struct {
 	UpdateTime string
 }
 
+type SameArticle struct {
+	ArticleId     int
+	FromArticleId int
+}
+
+func (SameArticle) TableName() string {
+	return "same_article"
+}
+
 func (ChapterErrorLog) TableName() string {
 	return "chapter_error_log"
 }

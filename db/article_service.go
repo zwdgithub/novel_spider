@@ -143,3 +143,25 @@ func (service *ArticleService) LoadPreChapter10(aid int) []*model.JieqiChapter {
 	service.db.Where("articleid = ? and chaptertype = 0", aid).Order("chapterid asc").Limit(10).Find(&list)
 	return list
 }
+
+func (service *ArticleService) RepairSyncSameAll(articleId int) {
+	var sameList []model.SameArticle
+	service.db.Where("from_article_id = ?", articleId).Find(&sameList)
+	for _, item := range sameList {
+		var blankChapters []model.JieqiChapter
+		service.db.Where("articleid = ? and size < 500 and chaptertype = 0", item.ArticleId).Find(&blankChapters)
+		for _, c := range blankChapters {
+			var chapter model.JieqiChapter
+			service.db.Where("articleid = ? and chapter_name = ?", articleId, c.Articlename).Find(&chapter)
+			if chapter.Chapterid != 0 {
+				b, err := service.bos.GetChapter(articleId, chapter.Chapterid)
+				if err != nil {
+					continue
+				}
+				_ = service.bos.PutChapter(c.Articleid, c.Chapterid, string(b))
+				log.Infof("repair article: %d, sync article: %d, chapter: %d", articleId, c.Articleid, c.Chapterid)
+			}
+		}
+		return
+	}
+}
