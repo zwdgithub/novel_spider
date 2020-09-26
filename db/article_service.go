@@ -152,7 +152,7 @@ func (service *ArticleService) RepairSyncSameAll(articleId int) {
 		service.db.Where("articleid = ? and size < 500 and chaptertype = 0", item.ArticleId).Find(&blankChapters)
 		for _, c := range blankChapters {
 			var chapter model.JieqiChapter
-			service.db.Where("articleid = ? and chapter_name = ?", articleId, c.Chaptername).Find(&chapter)
+			service.db.Where("articleid = ? and chaptername = ?", articleId, c.Chaptername).Find(&chapter)
 			if chapter.Chapterid != 0 {
 				b, err := service.bos.GetChapter(articleId, chapter.Chapterid)
 				if err != nil {
