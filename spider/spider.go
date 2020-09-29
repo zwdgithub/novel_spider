@@ -37,6 +37,7 @@ func main() {
 		spider.Process(article.NewArticle{
 			Url:            *u,
 			NewChapterName: "",
+			MaxChapterNum:  10000,
 		}, c)
 		return
 	}
