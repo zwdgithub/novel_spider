@@ -241,6 +241,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	addChapterNum := 0
 
 	defer func() {
+		log.Infof("process %s, defer gen opf addChapterNum: %d", obj.Url, addChapterNum)
 		if addChapterNum > 0 {
 			s.service.GenOpf(local.Articleid)
 		}
