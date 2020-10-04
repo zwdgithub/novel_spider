@@ -63,7 +63,7 @@ func (service *ArticleService) GenOpf(aid int) {
 	content := ""
 	content += `<?xml version="1.0" encoding="ISO-8859-1"?>`
 	content += "<package "
-	content += fmt.Sprintf("unique-identifier=%s_%d>", hostName, aid)
+	content += fmt.Sprintf("unique-identifier=\"%s_%d\">", hostName, aid)
 	content += "<metadata>"
 	content += "<dc-metadata>"
 	content += fmt.Sprintf("<dc:Title>%s</dc:Title>", article.Articlename)
