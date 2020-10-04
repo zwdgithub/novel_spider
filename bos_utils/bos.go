@@ -15,7 +15,7 @@ import (
 
 const chapterNameFmt = "/files/article/txt/%d/%d/%d.txt"
 const coverNameFmt = "/files/article/image/%d/%d/%ds.jpg"
-const opfNameFmt = "/files/article/image/%d/%d/index.opf"
+const opfNameFmt = "/files/article/txt/%d/%d/index.opf"
 
 type BosUtil struct {
 	bos    *bos.Client
