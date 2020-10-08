@@ -45,12 +45,13 @@ func (service *ArticleService) AddArticle(article *model.JieqiArticle) error {
 	return err
 }
 
-func (service *ArticleService) UpdateArticleOnAddChapter(article *model.JieqiArticle) error {
+func (service *ArticleService) UpdateArticleOnAddChapter(article *model.JieqiArticle, size int) error {
 	err := service.db.Model(model.JieqiArticle{}).Where("articleid = ?", article.Articleid).Update(map[string]interface{}{
 		"lastupdate":    int(time.Now().Unix()),
 		"lastchapter":   article.Lastchapter,
 		"chapters":      article.Chapters,
 		"lastchapterid": article.Lastchapterid,
+		"size":          gorm.Expr("size + ?", size),
 	}).Error
 	return err
 }
@@ -77,7 +78,7 @@ func (service *ArticleService) AddChapter(chapter *model.JieqiChapter, content s
 		Chapters:      chapter.Chapterorder,
 		Lastchapterid: chapter.Chapterid,
 	}
-	err = service.UpdateArticleOnAddChapter(article)
+	err = service.UpdateArticleOnAddChapter(article, len(content))
 	if err != nil {
 		return nil, err
 	}
