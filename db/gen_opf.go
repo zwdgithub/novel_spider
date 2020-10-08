@@ -73,6 +73,7 @@ func (service *ArticleService) GenOpf(aid int) {
 	intro := strings.ReplaceAll(article.Intro, "\r", "")
 	intro = strings.ReplaceAll(article.Intro, "\t", "")
 	intro = strings.ReplaceAll(article.Intro, "\n", "")
+	intro = strings.ReplaceAll(article.Intro, "&", "")
 
 	content += fmt.Sprintf("<dc:Description>%s</dc:Description>", intro)
 	content += fmt.Sprintf("<dc:Publisher>%s</dc:Publisher>", "爱好小说")
