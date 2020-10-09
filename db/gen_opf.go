@@ -99,9 +99,6 @@ func (service *ArticleService) GenOpf(aid int) {
 	spineText := ""
 	if len(list) > 0 {
 		for _, chapter := range list {
-			mainfestText += createManifestTag(chapter)
-		}
-		for _, chapter := range list {
 			chapter.Chaptername = clearXml(chapter.Chaptername)
 			mainfestText += createManifestTag(chapter)
 			spineText += createSpineTag(chapter)
