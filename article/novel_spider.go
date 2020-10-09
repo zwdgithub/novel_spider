@@ -280,7 +280,6 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			})
 		}
 		if err != nil {
-			s.retry(s.wsInfo.Host, obj.Url)
 			log.Infof("process %s add chapter error: %v", obj.Url, err)
 			return
 		}
