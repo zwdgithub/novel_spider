@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	localPath = "/mnt/local/local_chapter/%d"
-	localFile = "/mnt/local/local_chapter/%d/%d.txt"
+	localPath = "/mnt/local/local_chapter/%d/%d"
+	localFile = "/mnt/local/local_chapter/%d/%d/%d.txt"
 )
 
 func isExist(f string) bool {
@@ -29,7 +29,7 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 	log.Infof("process article id %d", item.Articleid)
 	cList := service.LoadPreChapter10(item.Articleid)
 	for _, c := range cList {
-		fileName := fmt.Sprintf(localFile, c.Articleid, c.Chapterid)
+		fileName := fmt.Sprintf(localFile, c.Articleid/1000, c.Articleid, c.Chapterid)
 		if isExist(fileName) {
 			continue
 		}
@@ -44,7 +44,7 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 			log.Infof("trans gbk error, aid: %d, cid: %d", c.Articleid, c.Chapterid)
 			return
 		}
-		path := fmt.Sprintf(localPath, item.Articleid)
+		path := fmt.Sprintf(localPath, item.Articleid/1000, item.Articleid)
 		if !isExist(path) {
 			err := os.MkdirAll(path, 0666)
 			if err != nil {
