@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	localPath = "/home/data/local_chapter/%d"
-	localFile = "/home/data/local_chapter/%d/%d.txt"
+	localPath = "/mnt/local/local_chapter/%d"
+	localFile = "/mnt/local/local_chapter/%d/%d.txt"
 )
 
 func isExist(f string) bool {
