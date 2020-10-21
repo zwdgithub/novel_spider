@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/antlabs/strsim"
 	"novel_spider/db"
 	"novel_spider/log"
 	"novel_spider/model"
 	"novel_spider/redis"
 	"novel_spider/util"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -133,11 +135,11 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 	canParse, err := s.CanParse(article.ArticleName, article.Author)
 	if err != nil {
-		log.Infof("process url: %s, can not parse now, error: %v", obj.Url, err)
+		log.Infof("process %s, can not parse now, error: %v", obj.Url, err)
 		return
 	}
 	if !canParse {
-		log.Infof("process url: %s, can not parse now,", obj.Url)
+		log.Infof("process %s, can not parse now,", obj.Url)
 		return
 	}
 	defer s.ParseEnd(article.ArticleName, article.Author)
@@ -201,19 +203,41 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 	}
 	if !match {
-		log.Infof("process %s, try to match second last chapter", obj.Url)
-		second, err := s.service.LastSecondChapter(local.Articleid)
-		if err != nil {
-			log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
-		}
-		for _, item := range allChapters {
-			if item.ChapterName == second {
-				match = true
-				log.Infof("process %s, try to match second last chapter success", obj.Url)
-				continue
+		log.Infof("process %s, try to match last chapter", obj.Url)
+		num := 5
+		lastList := s.service.LastChapterList(local.Articleid, num)
+		localCache := make([]string, 0)
+		for _, v := range lastList {
+			content, err := s.service.GetLocalContent(v.Articleid, v.Chapterid)
+			content = strings.ReplaceAll(content, "\r", "")
+			content = strings.ReplaceAll(content, "\n", "")
+			if err != nil {
+				log.Infof("process %s, get local content error: %v", obj.Url, err)
+				return
 			}
-			if match {
-				newChapters = append(newChapters, item)
+			localCache = append(localCache, content)
+		}
+		for i := len(allChapters) - 1; i >= 0; i-- {
+			content, err := s.ws.ChapterContent(allChapters[i].Url)
+			if err != nil {
+				log.Infof("process %s, try to match chapter get content error: %v", obj.Url, err)
+				return
+			}
+			content = strings.ReplaceAll(content, "\r", "")
+			content = strings.ReplaceAll(content, "\n", "")
+			for _, c := range localCache {
+				score := strsim.Compare(content, c, strsim.DiceCoefficient())
+				if score >= 0.75 {
+					match = true
+					for j := i + 1; j < len(allChapters); j++ {
+						newChapters = append(newChapters, allChapters[i])
+					}
+					log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
+					break
+				}
+			}
+			if match || i < len(allChapters)-5 {
+				break
 			}
 		}
 	}

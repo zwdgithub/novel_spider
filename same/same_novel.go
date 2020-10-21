@@ -20,6 +20,10 @@ const (
 	localFile = "/mnt/local/local_chapter/%d/%d/%d.txt"
 )
 
+var (
+	match = flag.String("match", "CreateBiqugeBizSpider", "website reflect")
+)
+
 func isExist(f string) bool {
 	_, err := os.Stat(f)
 	return err == nil || os.IsExist(err)
@@ -66,6 +70,19 @@ func loadPre10(item *model.JieqiArticle, service *db.ArticleService, bos *bos_ut
 	}
 }
 
+func matchSameNovel(list []*model.JieqiArticle) {
+	//invalidArticle := make(map[int]bool)
+	//matchList := make([]int, 0)
+	//for _, item := range list {
+	//	if articleId, ok := invalidArticle[item.Articleid]; !ok {
+	//		for _, matchId := range matchList {
+	//			p := fmt.Sprintf(localPath, item.Articleid/1000, item.Articleid)
+	//
+	//		}
+	//	}
+	//}
+}
+
 func main() {
 	flag.Parse()
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
@@ -75,6 +92,10 @@ func main() {
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
 	list := service.LoadAllArticle()
 	log.Infof("list len is %d", len(list))
+	if *match == "match" {
+
+		return
+	}
 	for _, item := range list {
 		loadPre10(item, service, bosClient)
 	}

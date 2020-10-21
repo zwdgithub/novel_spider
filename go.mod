@@ -19,4 +19,5 @@ require (
 	golang.org/x/text v0.3.2
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0
+	github.com/antlabs/strsim v0.0.1
 )

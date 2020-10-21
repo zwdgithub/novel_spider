@@ -181,3 +181,29 @@ func (service *ArticleService) RepairSyncSameAll(articleId int) {
 		}
 	}
 }
+
+func (service *ArticleService) LoadShortChapter(articleId int, host string) []*model.JieqiChapter {
+	var chapters []*model.JieqiChapter
+	service.db.Where("articleid = ? and size < 500", articleId).Find(&chapters)
+	return chapters
+}
+
+func (service *ArticleService) LastChapterList(articleId int, num int) []*model.JieqiChapter {
+	var list []*model.JieqiChapter
+	service.db.Where("articleid = ?", articleId).Order("chapterorder desc, chapterid desc").Limit(num).Find(&list)
+	return list
+}
+
+func (service *ArticleService) GetLocalContent(articleId, chapterId int) (string, error) {
+	b, err := service.bos.GetChapter(articleId, chapterId)
+	if err != nil {
+		return "", err
+	}
+	r := transform.NewReader(bytes.NewReader(b), simplifiedchinese.GBK.NewDecoder())
+	b, err = ioutil.ReadAll(r)
+	if err != nil {
+		log.Infof("trans gbk error, aid: %d, cid: %d", articleId, chapterId)
+		return "", err
+	}
+	return string(b), nil
+}
