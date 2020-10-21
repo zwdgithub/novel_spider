@@ -235,7 +235,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 					if score >= 0.75 && len(content) > 500 {
 						match = true
 						for j := i + 1; j < len(allChapters); j++ {
-							newChapters = append(newChapters, allChapters[i])
+							newChapters = append(newChapters, allChapters[j])
 						}
 						log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
 						break
