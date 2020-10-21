@@ -215,6 +215,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 				log.Infof("process %s, get local content error: %v", obj.Url, err)
 				return
 			}
+			if len(content) < 500 {
+				continue
+			}
 			localCache = append(localCache, content)
 		}
 		for i := len(allChapters) - 1; i >= 0; i-- {
@@ -265,7 +268,6 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	addChapterNum := 0
 
 	defer func() {
-		log.Infof("process %s, defer gen opf addChapterNum: %d", obj.Url, addChapterNum)
 		if addChapterNum > 0 {
 			s.service.GenOpf(local.Articleid)
 		}
