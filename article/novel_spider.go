@@ -216,33 +216,37 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 				return
 			}
 			if len(content) < 500 {
-				continue
+				localCache = make([]string, 0)
+				break
 			}
 			localCache = append(localCache, content)
 		}
-		for i := len(allChapters) - 1; i >= 0; i-- {
-			content, err := s.ws.ChapterContent(allChapters[i].Url)
-			if err != nil {
-				log.Infof("process %s, try to match chapter get content error: %v", obj.Url, err)
-				return
-			}
-			content = strings.ReplaceAll(content, "\r", "")
-			content = strings.ReplaceAll(content, "\n", "")
-			for _, c := range localCache {
-				score := strsim.Compare(content, c, strsim.DiceCoefficient())
-				if score >= 0.75 {
-					match = true
-					for j := i + 1; j < len(allChapters); j++ {
-						newChapters = append(newChapters, allChapters[i])
+		if len(localCache) > 0 {
+			for i := len(allChapters) - 1; i >= 0; i-- {
+				content, err := s.ws.ChapterContent(allChapters[i].Url)
+				if err != nil {
+					log.Infof("process %s, try to match chapter get content error: %v", obj.Url, err)
+					return
+				}
+				content = strings.ReplaceAll(content, "\r", "")
+				content = strings.ReplaceAll(content, "\n", "")
+				for _, c := range localCache {
+					score := strsim.Compare(content, c, strsim.DiceCoefficient())
+					if score >= 0.75 && len(content) > 500 {
+						match = true
+						for j := i + 1; j < len(allChapters); j++ {
+							newChapters = append(newChapters, allChapters[i])
+						}
+						log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
+						break
 					}
-					log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
+				}
+				if match || i < len(allChapters)-5 {
 					break
 				}
 			}
-			if match || i < len(allChapters)-5 {
-				break
-			}
 		}
+
 	}
 	if !match {
 		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
