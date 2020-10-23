@@ -27,6 +27,7 @@ type NovelWebsites interface {
 	ChapterContent(chapterUrl string) (string, error)
 	Consumer() (string, error)
 	ConsumerMany() (string, error)
+	HasNext() (*NewChapter, error)
 	NewList() ([]string, error)
 }
 

@@ -201,3 +201,7 @@ func (n *XhxswzCom) NewList() ([]string, error) {
 	}
 	return r, nil
 }
+
+func (n *XhxswzCom) HasNext() (*NewChapter, error) {
+	return nil, nil
+}

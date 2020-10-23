@@ -150,3 +150,7 @@ func (n *AikantxtLa) NewList() ([]string, error) {
 	r := make([]string, 0)
 	return r, nil
 }
+
+func (n *AikantxtLa) HasNext() (*NewChapter, error) {
+	return nil, nil
+}

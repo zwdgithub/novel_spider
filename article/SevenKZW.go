@@ -118,3 +118,7 @@ func (n *SevenKZW) NewList() ([]string, error) {
 	r := make([]string, 0)
 	return r, nil
 }
+
+func (n *SevenKZW) HasNext() (*NewChapter, error) {
+	return nil, nil
+}

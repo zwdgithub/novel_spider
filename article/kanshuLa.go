@@ -159,3 +159,7 @@ func (n *KanshuLa) NewList() ([]string, error) {
 	}
 	return r, nil
 }
+
+func (n *KanshuLa) HasNext() (*NewChapter, error) {
+	return nil, nil
+}

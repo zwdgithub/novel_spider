@@ -152,3 +152,7 @@ func (n *BiqugeBiz) NewList() ([]string, error) {
 	}
 	return r, nil
 }
+
+func (n *BiqugeBiz) HasNext() (*NewChapter, error) {
+	return nil, nil
+}
