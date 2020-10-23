@@ -218,37 +218,38 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			}
 			if len(content) < 500 {
 				localCache = make([]string, 0)
-				break
+				goto matchLabel
 			}
 			localCache = append(localCache, content)
 		}
-		if len(localCache) > 0 {
-			for i := len(allChapters) - 1; i >= 0; i-- {
-				content, err := s.ws.ChapterContent(allChapters[i].Url)
-				if err != nil {
-					log.Infof("process %s, try to match chapter get content error: %v", obj.Url, err)
-					return
-				}
-				content = strings.ReplaceAll(content, "\r", "")
-				content = strings.ReplaceAll(content, "\n", "")
-				for _, c := range localCache {
-					score := strsim.Compare(content, c, strsim.DiceCoefficient())
-					if score >= 0.75 && len(content) > 500 {
-						match = true
-						for j := i + 1; j < len(allChapters); j++ {
-							newChapters = append(newChapters, allChapters[j])
-						}
-						log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
-						break
+
+		for i := len(allChapters) - 1; i >= 0; i-- {
+			content, err := s.ws.ChapterContent(allChapters[i].Url)
+			if err != nil {
+				log.Infof("process %s, try to match chapter get content error: %v", obj.Url, err)
+				return
+			}
+			content = strings.ReplaceAll(content, "\r", "")
+			content = strings.ReplaceAll(content, "\n", "")
+			for _, c := range localCache {
+				score := strsim.Compare(content, c, strsim.DiceCoefficient())
+				if score >= 0.75 && len(content) > 500 {
+					match = true
+					for j := i + 1; j < len(allChapters); j++ {
+						newChapters = append(newChapters, allChapters[j])
 					}
-				}
-				if match || i < len(allChapters)-5 {
+					log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
 					break
 				}
+			}
+			if match || i < len(allChapters)-5 {
+				break
 			}
 		}
 
 	}
+
+matchLabel:
 	if !match {
 		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		return
@@ -290,6 +291,10 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		var contentError error
 		if len(content) <= s.wsInfo.ShortContent {
 			contentError = errors.New(fmt.Sprintf("process %s content short", obj.Url))
+			content = shortContent
+		}
+		if strings.Contains(content, "@font-face") {
+			contentError = errors.New(fmt.Sprintf("process %s content qidian error", obj.Url))
 			content = shortContent
 		}
 		chapter := &model.JieqiChapter{
