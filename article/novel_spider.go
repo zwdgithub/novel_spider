@@ -419,8 +419,20 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 			log.Infof("process %s, get local content error: %v", obj.Url, err)
 			return 0, errors.New("")
 		}
+		c1 := v.Chaptername
+		splitFlag := false
+		if strings.Contains(c1, " ") {
+			splits := strings.Split(c1, " ")
+			c1 = strings.Join(splits[1:], "")
+			splitFlag = true
+		}
 		for i, chapter := range allChapter {
-			score := strsim.Compare(v.Chaptername, chapter.ChapterName, strsim.Jaro())
+			c2 := chapter.ChapterName
+			if splitFlag && strings.Contains(c2, " ") {
+				splits := strings.Split(c2, " ")
+				c2 = strings.Join(splits[1:], "")
+			}
+			score := strsim.Compare(c1, c2, strsim.DiceCoefficient())
 			if score > 0.65 && math.Abs(float64(count-i)) <= 100 {
 				log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %v", obj.Url, v.Chaptername, chapter.ChapterName, score)
 				newContent, err := s.ws.ChapterContent(chapter.Url)
