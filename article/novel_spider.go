@@ -243,11 +243,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 					goto matchLabel
 				}
 			}
-			if match || i < len(allChapters)-5 {
-				goto matchLabel
-			}
 		}
 
+		log.Infof("process %s, try to match all chapter", obj.Url)
 		index, err := s.tryFindNewChapter(obj, allChapters, local)
 		if err != nil {
 			goto matchLabel
@@ -430,6 +428,8 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 				tempChapterName = strings.Join(splits[1:], "")
 			}
 			score := strsim.Compare(v.Chaptername, tempChapterName, strsim.DiceCoefficient())
+			log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %d", obj.Url, v.Chaptername, tempChapterName, score)
+
 			if score > 0.5 && math.Abs(float64(count-i)) <= 100 {
 				newContent, err := s.ws.ChapterContent(chapter.Url)
 				if err != nil {
