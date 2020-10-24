@@ -218,8 +218,10 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 				return
 			}
 			if len(content) < 500 {
-				localCache = make([]string, 0)
-				goto matchLabel
+				if util.ValidChapterName(v.Chaptername) {
+					localCache = make([]string, 0)
+					goto matchLabel
+				}
 			}
 			localCache = append(localCache, content)
 		}
