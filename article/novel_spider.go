@@ -428,9 +428,13 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 		}
 		for i, chapter := range allChapter {
 			c2 := chapter.ChapterName
-			if splitFlag && strings.Contains(c2, " ") {
-				splits := strings.Split(c2, " ")
-				c2 = strings.Join(splits[1:], "")
+			if splitFlag {
+				if strings.Contains(c2, " ") {
+					splits := strings.Split(c2, " ")
+					c2 = strings.Join(splits[1:], "")
+				} else {
+					c1 = v.Chaptername
+				}
 			}
 			score := strsim.Compare(c1, c2, strsim.DiceCoefficient())
 			if score > 0.65 && math.Abs(float64(count-i)) <= 100 {
