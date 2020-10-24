@@ -194,6 +194,12 @@ func (service *ArticleService) LastChapterList(articleId int, num int) []*model.
 	return list
 }
 
+func (service *ArticleService) ChapterCount(articleId int) int {
+	var count int
+	service.db.Model(model.JieqiChapter{}).Where("articleid = ?", articleId).Count(&count)
+	return count
+}
+
 func (service *ArticleService) GetLocalContent(articleId, chapterId int) (string, error) {
 	b, err := service.bos.GetChapter(articleId, chapterId)
 	if err != nil {

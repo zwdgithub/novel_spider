@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/antlabs/strsim"
+	"math"
 	"novel_spider/db"
 	"novel_spider/log"
 	"novel_spider/model"
@@ -239,14 +240,22 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 						newChapters = append(newChapters, allChapters[j])
 					}
 					log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
-					break
+					goto matchLabel
 				}
 			}
 			if match || i < len(allChapters)-5 {
-				break
+				goto matchLabel
 			}
 		}
 
+		index, err := s.tryFindNewChapter(obj, allChapters, local)
+		if err != nil {
+			goto matchLabel
+		}
+		match = true
+		for i := index + 1; i < len(allChapters); i++ {
+			newChapters = append(newChapters, allChapters[i])
+		}
 	}
 
 matchLabel:
@@ -388,4 +397,53 @@ func (s *NovelSpider) retry(host, url string) {
 		NewChapterName: "",
 	})
 	s.redis.Retry(s.wsInfo.Host, string(b))
+}
+
+func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter, local *model.JieqiArticle) (int, error) {
+	num := 10
+	lastList := s.service.LastChapterList(local.Articleid, num)
+	count := s.service.ChapterCount(local.Articleid)
+
+	for i, v := range lastList {
+		splits := strings.Split(v.Chaptername, " ")
+		if len(splits) > 0 {
+			lastList[i].Chaptername = strings.Join(splits[1:], "")
+		}
+	}
+
+	for _, v := range lastList {
+		content, err := s.service.GetLocalContent(v.Articleid, v.Chapterid)
+		content = strings.ReplaceAll(content, "\r", "")
+		content = strings.ReplaceAll(content, "\n", "")
+		if len(content) < 500 {
+			log.Infof("process %s, get local content length short, chapter id: %d", obj.Url, v.Chapterid)
+			return 0, errors.New("")
+		}
+		if err != nil {
+			log.Infof("process %s, get local content error: %v", obj.Url, err)
+			return 0, errors.New("")
+		}
+		for i, chapter := range allChapter {
+			tempChapterName := chapter.ChapterName
+			splits := strings.Split(tempChapterName, " ")
+			if len(splits) > 0 {
+				tempChapterName = strings.Join(splits[1:], "")
+			}
+			score := strsim.Compare(v.Chaptername, tempChapterName, strsim.DiceCoefficient())
+			if score > 0.5 && math.Abs(float64(count-i)) <= 100 {
+				newContent, err := s.ws.ChapterContent(chapter.Url)
+				if err != nil {
+					log.Infof("process %s, tryFindNewChapter get content error: %v", obj.Url, err)
+					return 0, errors.New("")
+				}
+				score = strsim.Compare(content, newContent, strsim.DiceCoefficient())
+				if score >= 0.75 {
+					return i, nil
+				}
+			}
+		}
+
+	}
+
+	return 0, errors.New("")
 }
