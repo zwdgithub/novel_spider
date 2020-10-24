@@ -405,13 +405,6 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 	lastList := s.service.LastChapterList(local.Articleid, num)
 	count := s.service.ChapterCount(local.Articleid)
 
-	for i, v := range lastList {
-		splits := strings.Split(v.Chaptername, " ")
-		if len(splits) > 0 {
-			lastList[i].Chaptername = strings.Join(splits[1:], "")
-		}
-	}
-
 	for _, v := range lastList {
 		content, err := s.service.GetLocalContent(v.Articleid, v.Chapterid)
 		content = strings.ReplaceAll(content, "\r", "")
@@ -425,15 +418,9 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 			return 0, errors.New("")
 		}
 		for i, chapter := range allChapter {
-			tempChapterName := chapter.ChapterName
-			splits := strings.Split(tempChapterName, " ")
-			if len(splits) > 0 {
-				tempChapterName = strings.Join(splits[1:], "")
-			}
-			score := strsim.Compare(v.Chaptername, tempChapterName, strsim.DiceCoefficient())
-			log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %v", obj.Url, v.Chaptername, tempChapterName, score)
-
+			score := strsim.Compare(v.Chaptername, chapter.ChapterName, strsim.DiceCoefficient())
 			if score > 0.65 && math.Abs(float64(count-i)) <= 100 {
+				log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %v", obj.Url, v.Chaptername, chapter.ChapterName, score)
 				newContent, err := s.ws.ChapterContent(chapter.Url)
 				if err != nil {
 					log.Infof("process %s, tryFindNewChapter get content error: %v", obj.Url, err)
