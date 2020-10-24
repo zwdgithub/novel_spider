@@ -243,6 +243,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 					goto matchLabel
 				}
 			}
+			if len(allChapters)-i >= 5 {
+				break
+			}
 		}
 
 		log.Infof("process %s, try to match all chapter", obj.Url)
