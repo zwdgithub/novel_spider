@@ -411,7 +411,7 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 		content, err := s.service.GetLocalContent(v.Articleid, v.Chapterid)
 		content = strings.ReplaceAll(content, "\r", "")
 		content = strings.ReplaceAll(content, "\n", "")
-		if len(content) < 500 {
+		if len(content) < 500 && util.ValidChapterName(v.Chaptername) {
 			log.Infof("process %s, get local content length short, chapter id: %d", obj.Url, v.Chapterid)
 			return 0, errors.New("")
 		}
