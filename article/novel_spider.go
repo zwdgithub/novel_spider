@@ -421,6 +421,7 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 			return 0, errors.New("")
 		}
 		c1 := v.Chaptername
+		c1 = strings.TrimSpace(c1)
 		splitFlag := false
 		if strings.Contains(c1, " ") {
 			splits := strings.Split(c1, " ")
@@ -429,6 +430,7 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 		}
 		for i, chapter := range allChapter {
 			c2 := chapter.ChapterName
+			c2 = strings.TrimSpace(c2)
 			if splitFlag {
 				if strings.Contains(c2, " ") {
 					splits := strings.Split(c2, " ")
