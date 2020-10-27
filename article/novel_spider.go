@@ -438,7 +438,7 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 				}
 			}
 			score := strsim.Compare(c1, c2, strsim.DiceCoefficient())
-			log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %v", obj.Url, v.Chaptername, chapter.ChapterName, score)
+			log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %v", obj.Url, c1, c2, score)
 			if score > 0.65 && math.Abs(float64(count-i)) <= 100 {
 				newContent, err := s.ws.ChapterContent(chapter.Url)
 				if err != nil {
