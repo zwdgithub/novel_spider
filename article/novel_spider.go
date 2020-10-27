@@ -205,6 +205,10 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		}
 	}
 
+	if match && len(newChapters) == 0 {
+		log.Infof("process %s, new chapters none, info: name:%s, author:%s, last:%s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
+		return
+	}
 	if !match {
 		log.Infof("process %s, try to match last chapter", obj.Url)
 		num := 1
@@ -243,7 +247,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 						newChapters = append(newChapters, allChapters[j])
 					}
 					log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
-					goto matchLabel
+					if len(newChapters) == 0 {
+						return
+					}
 				}
 			}
 			if len(allChapters)-i >= 5 {
@@ -260,6 +266,11 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		for i := index + 1; i < len(allChapters); i++ {
 			newChapters = append(newChapters, allChapters[i])
 		}
+
+		log.Infof("process %s, try to match chapter success, new chapter len is %d", obj.Url, len(newChapters))
+		if len(newChapters) == 0 {
+			return
+		}
 	}
 
 matchLabel:
@@ -271,6 +282,9 @@ matchLabel:
 	log.Infof("process %s, need crawl chapter %d", obj.Url, len(newChapters))
 	if len(newChapters) == 0 {
 		log.Infof("process %s, new chapters none, info: name:%s, author:%s, last:%s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
+		if article.LastChapter != local.Lastchapter {
+
+		}
 		return
 	}
 
@@ -298,7 +312,7 @@ matchLabel:
 		}
 		content, err := s.ws.ChapterContent(item.Url)
 		if err != nil {
-			log.Infof("process %s get content error: %v, content is %s, add new chapter: %d", obj.Url, err, content, addChapterNum)
+			log.Infof("process %s, get content error: %v, content is %s, add new chapter: %d", obj.Url, err, content, addChapterNum)
 			return
 		}
 		var contentError error
@@ -317,6 +331,8 @@ matchLabel:
 			Articlename:  local.Articlename,
 		}
 		chapter, err = s.service.AddChapter(chapter, content)
+
+		log.Infof("process %s, new chapter name: %s, local article id: %d, ", item.ChapterName, local.Articleid)
 
 		if util.ValidChapterName(item.ChapterName) && contentError != nil && chapter != nil && chapter.Chapterid != 0 {
 			s.service.AddErrorChapter(model.ChapterErrorLog{
