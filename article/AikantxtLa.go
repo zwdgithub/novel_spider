@@ -151,6 +151,6 @@ func (n *AikantxtLa) NewList() ([]string, error) {
 	return r, nil
 }
 
-func (n *AikantxtLa) HasNext() (*NewChapter, error) {
-	return nil, nil
+func (n *AikantxtLa) HasNext(url string) *NewChapter {
+	return nil
 }

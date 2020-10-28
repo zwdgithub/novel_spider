@@ -202,6 +202,6 @@ func (n *XhxswzCom) NewList() ([]string, error) {
 	return r, nil
 }
 
-func (n *XhxswzCom) HasNext() (*NewChapter, error) {
-	return nil, nil
+func (n *XhxswzCom) HasNext(url string) *NewChapter {
+	return nil
 }

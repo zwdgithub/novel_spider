@@ -28,7 +28,7 @@ type NovelWebsites interface {
 	ChapterContent(chapterUrl string) (string, error)
 	Consumer() (string, error)
 	ConsumerMany() (string, error)
-	HasNext() (*NewChapter, error)
+	HasNext(url string) *NewChapter
 	NewList() ([]string, error)
 }
 
@@ -289,15 +289,11 @@ matchLabel:
 	}
 
 	if len(newChapters) > obj.MaxChapterNum {
-		s.retry(s.wsInfo.Host, obj.Url)
+		s.retry(s.wsInfo.Host, obj.Url, obj.NewChapterName)
 		log.Infof("process %s, need crawl chapter too many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
 		return
 	}
 
-	retry := true
-	if obj.NewChapterName != "" {
-		retry = false
-	}
 	addChapterNum := 0
 
 	defer func() {
@@ -305,10 +301,14 @@ matchLabel:
 			s.service.GenOpf(local.Articleid)
 		}
 	}()
+	matched := false
 	for i, item := range newChapters {
 		if s.redis.Pause(s.wsInfo.Host) {
 			log.Infof("process %s stop", obj.Url)
 			return
+		}
+		if obj.NewChapterName != "" && obj.NewChapterName == item.ChapterName {
+			matched = true
 		}
 		content, err := s.ws.ChapterContent(item.Url)
 		if err != nil {
@@ -332,7 +332,7 @@ matchLabel:
 		}
 		chapter, err = s.service.AddChapter(chapter, content)
 
-		log.Infof("process %s, new chapter name: %s, local article id: %d, ", item.ChapterName, local.Articleid)
+		log.Infof("process %s, new chapter name: %s, local article id: %d, ", obj.Url, item.ChapterName, local.Articleid)
 
 		if util.ValidChapterName(item.ChapterName) && contentError != nil && chapter != nil && chapter.Chapterid != 0 {
 			s.service.AddErrorChapter(model.ChapterErrorLog{
@@ -350,19 +350,14 @@ matchLabel:
 		}
 		addChapterNum++
 		order += 1
-		if obj.NewChapterName != "" && obj.NewChapterName == item.ChapterName {
-			retry = false
-		}
-		if i == len(newChapters)-1 {
 
+		if i == len(allChapters)-1 && !matched && obj.NewChapterName != "" && obj.NewChapterName != item.ChapterName {
+			log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
+			s.retry(s.wsInfo.Host, obj.Url, obj.NewChapterName)
 		}
 	}
 	log.Infof("process %s, success, add %d chapter", obj.Url, addChapterNum)
 
-	if obj.NewChapterName != "" && retry {
-		log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, newChapters[len(newChapters)-1].ChapterName)
-		s.retry(s.wsInfo.Host, obj.Url)
-	}
 	return
 }
 
@@ -411,10 +406,10 @@ func (s *NovelSpider) Repair() {
 	}
 }
 
-func (s *NovelSpider) retry(host, url string) {
+func (s *NovelSpider) retry(host, url, chapterName string) {
 	b, _ := json.Marshal(NewArticle{
 		Url:            url,
-		NewChapterName: "",
+		NewChapterName: chapterName,
 	})
 	s.redis.Retry(s.wsInfo.Host, string(b))
 }

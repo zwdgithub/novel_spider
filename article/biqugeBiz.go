@@ -153,6 +153,6 @@ func (n *BiqugeBiz) NewList() ([]string, error) {
 	return r, nil
 }
 
-func (n *BiqugeBiz) HasNext() (*NewChapter, error) {
-	return nil, nil
+func (n *BiqugeBiz) HasNext(url string) *NewChapter {
+	return nil
 }

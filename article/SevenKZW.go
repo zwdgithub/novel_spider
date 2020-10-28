@@ -119,6 +119,6 @@ func (n *SevenKZW) NewList() ([]string, error) {
 	return r, nil
 }
 
-func (n *SevenKZW) HasNext() (*NewChapter, error) {
-	return nil, nil
+func (n *SevenKZW) HasNext(url string) *NewChapter {
+	return nil
 }

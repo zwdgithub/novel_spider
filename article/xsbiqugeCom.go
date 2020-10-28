@@ -153,6 +153,6 @@ func (n *XsbiqugeCom) NewList() ([]string, error) {
 	return r, nil
 }
 
-func (n *XsbiqugeCom) HasNext() (*NewChapter, error) {
-	return nil, nil
+func (n *XsbiqugeCom) HasNext(url string) *NewChapter {
+	return nil
 }
