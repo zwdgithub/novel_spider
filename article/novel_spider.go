@@ -145,6 +145,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		return
 	}
 	defer s.ParseEnd(article.ArticleName, article.Author)
+	obj.NewChapterName = strings.TrimSpace(obj.NewChapterName)
 	local, err := s.service.LocalArticleInfo(article.ArticleName, article.Author)
 	if err != nil {
 		log.Infof("process %s, get local info error: %v ", obj.Url, err)
