@@ -17,6 +17,13 @@ func init() {
 	methods["CreateSevenKZWComSpider"] = CreateSevenKZWComSpider
 	methods["CreateAikantxtLaSpider"] = CreateAikantxtLaSpider
 	methods["CreateXhxswzComSpider"] = CreateXhxswzComSpider
+
+	methods["biquge.biz"] = CreateBiqugeBizSpider
+	methods["xsbiquge.com"] = CreateXsbiqugeComSpider
+	methods["kanshu.la"] = CreateKanshuLaSpider
+	methods["aikantxt.la"] = CreateAikantxtLaSpider
+	methods["7kzw.com"] = CreateSevenKZWComSpider
+	methods["xhxswz.com"] = CreateXhxswzComSpider
 }
 
 func CreateBiqugeBizSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
