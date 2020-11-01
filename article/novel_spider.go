@@ -176,6 +176,10 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 		log.Infof("process %s, parse chapter list error: %v", obj.Url, err)
 		return
 	}
+
+	for i, v := range allChapters {
+		allChapters[i].ChapterName = strings.TrimSpace(v.ChapterName)
+	}
 	targetLast := obj.NewChapterName
 	if targetLast == "" {
 		targetLast = allChapters[len(allChapters)-1].ChapterName
