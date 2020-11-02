@@ -299,7 +299,12 @@ matchLabel:
 	}
 
 	if len(newChapters) > obj.MaxChapterNum {
-		s.retry(s.wsInfo.Host, obj.Url, obj.NewChapterName)
+		b, _ := json.Marshal(NewArticle{
+			Url:            obj.Url,
+			NewChapterName: obj.NewChapterName,
+			Host:           s.wsInfo.Host,
+		})
+		s.redis.PutUrlToQueue(s.wsInfo.Host, string(b))
 		log.Infof("process %s, need crawl chapter too many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
 		return
 	}
