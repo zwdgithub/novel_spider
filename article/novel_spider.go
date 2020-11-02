@@ -43,6 +43,7 @@ type NewArticle struct {
 	Url            string
 	NewChapterName string
 	MaxChapterNum  int
+	Host           string
 }
 
 type NewChapter struct {
@@ -213,8 +214,8 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	if match && len(newChapters) == 0 {
 		log.Infof("process %s, new chapters none, info: name:%s, author:%s, last:%s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
 		if obj.NewChapterName != "" && obj.NewChapterName != allChapters[len(allChapters)-1].ChapterName {
-			//log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, allChapters[len(allChapters)-1].ChapterName)
-			//s.retry(s.wsInfo.Host, obj.Url, obj.NewChapterName)
+			log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, allChapters[len(allChapters)-1].ChapterName)
+			s.retry(s.wsInfo.Host, obj.Url, obj.NewChapterName)
 		}
 		return
 	}
@@ -415,10 +416,28 @@ func (s *NovelSpider) Repair() {
 	}
 }
 
+func (s *NovelSpider) Retry() {
+	for {
+		result, err := s.redis.GetRetryArticle(s.wsInfo.Host)
+		if err != nil {
+			log.Infof("process %s, retry error: %v", s.wsInfo.Host, err)
+			time.Sleep(time.Second * 10)
+		}
+		var item NewArticle
+		err = json.Unmarshal([]byte(result[0].Member.(string)), &item)
+		if err != nil {
+			log.Infof("process %s, retry error: %v", s.wsInfo.Host, err)
+			time.Sleep(time.Second * 10)
+		}
+		s.redis.PutUrlToQueue(item.Host, result[0].Member.(string))
+	}
+}
+
 func (s *NovelSpider) retry(host, url, chapterName string) {
 	b, _ := json.Marshal(NewArticle{
 		Url:            url,
 		NewChapterName: chapterName,
+		Host:           host,
 	})
 	s.redis.Retry(s.wsInfo.Host, string(b))
 }

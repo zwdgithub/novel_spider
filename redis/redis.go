@@ -9,8 +9,9 @@ import (
 )
 
 const (
-	ParsingKey       = "parsing|%s|%s"
-	NeedParseListKey = "need_parse_list_%s"
+	ParsingKey         = "parsing|%s|%s"
+	NeedParseListKey   = "need_parse_list_%s"
+	RetryDelayQueueKey = "retry_delay_queue_%s"
 )
 
 type RedisUtil struct {
@@ -80,8 +81,30 @@ func (r *RedisUtil) PutUrlToQueue(website, url string) {
 func (r *RedisUtil) Retry(website, url string) {
 	r.lock.Lock()
 	defer r.lock.Unlock()
-	website += "_many_chapters"
-	r.PutUrlToQueue(website, url)
+
+	r.conn.ZAdd(fmt.Sprintf(RetryDelayQueueKey, website), redis.Z{
+		Score:  float64(time.Now().Unix() + 60), // retry in one minute,
+		Member: url,
+	})
+}
+
+func (r *RedisUtil) GetRetryArticle(website string) ([]redis.Z, error) {
+	r.lock.Lock()
+	defer r.lock.Unlock()
+	key := fmt.Sprintf(RetryDelayQueueKey, website)
+	result, err := r.conn.ZRangeWithScores(key, 0, 1).Result()
+	if err != nil {
+		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, errors.New("result empty")
+	}
+	fmt.Println(int64(result[0].Score), time.Now().Unix())
+	if time.Now().Unix() <= int64(result[0].Score) {
+		return nil, errors.New("time not match")
+	}
+	r.conn.ZRem(key, result[0].Member)
+	return result, nil
 }
 
 func (r *RedisUtil) GetUrlFromQueue(website string) (string, error) {

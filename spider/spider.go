@@ -43,6 +43,7 @@ func main() {
 	}
 	go spider.Repair()
 	go spider.Consumer(true)
+	go spider.Retry()
 	spider.Consumer(false)
 
 	time.Sleep(time.Second * 10)
