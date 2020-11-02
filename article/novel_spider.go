@@ -422,12 +422,14 @@ func (s *NovelSpider) Retry() {
 		if err != nil {
 			log.Infof("process %s, retry error: %v", s.wsInfo.Host, err)
 			time.Sleep(time.Second * 10)
+			continue
 		}
 		var item NewArticle
 		err = json.Unmarshal([]byte(result[0].Member.(string)), &item)
 		if err != nil {
 			log.Infof("process %s, retry error: %v", s.wsInfo.Host, err)
 			time.Sleep(time.Second * 10)
+			continue
 		}
 		s.redis.PutUrlToQueue(item.Host, result[0].Member.(string))
 	}
