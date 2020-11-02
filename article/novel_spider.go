@@ -304,7 +304,7 @@ matchLabel:
 			NewChapterName: obj.NewChapterName,
 			Host:           s.wsInfo.Host,
 		})
-		s.redis.PutUrlToQueue(s.wsInfo.Host, string(b))
+		s.redis.PutUrlToQueue(s.wsInfo.Host+"_many_chapters", string(b))
 		log.Infof("process %s, need crawl chapter too many, chapter num: %d, max: %d", obj.Url, len(newChapters), obj.MaxChapterNum)
 		return
 	}
