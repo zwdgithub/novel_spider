@@ -56,8 +56,26 @@ type SameArticle struct {
 	FromArticleId int
 }
 
+type NovelNotMatchLog struct {
+	Id               int
+	Host             string
+	Url              string
+	ArticleName      string
+	Author           string
+	NewLastChapter   string
+	LocalArticleId   int
+	LocalLastChapter string
+	Repair           int
+	CreateTime       string
+	UpdateTime       string
+}
+
 func (SameArticle) TableName() string {
 	return "same_article"
+}
+
+func (NovelNotMatchLog) TableName() string {
+	return "novel_not_match_log"
 }
 
 func (ChapterErrorLog) TableName() string {

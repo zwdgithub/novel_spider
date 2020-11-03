@@ -285,6 +285,16 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 
 matchLabel:
 	if !match {
+		matchLog := &model.NovelNotMatchLog{
+			Host:             s.wsInfo.Host,
+			Url:              obj.Url,
+			ArticleName:      local.Articlename,
+			Author:           local.Author,
+			NewLastChapter:   allChapters[len(allChapters)-1].ChapterName,
+			LocalArticleId:   local.Articleid,
+			LocalLastChapter: local.Lastchapter,
+		}
+		s.service.SaveNotMachLog(matchLog)
 		log.Infof("process %s, no chapter match, info: %s, %s, %s, %s", obj.Url, local.Articlename, local.Author, allChapters[len(allChapters)-1].ChapterName, local.Lastchapter)
 		return
 	}
