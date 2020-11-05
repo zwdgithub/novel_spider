@@ -263,6 +263,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 					if len(newChapters) == 0 {
 						return
 					}
+					goto matchLabel
 				}
 			}
 			if len(allChapters)-i >= 5 {
