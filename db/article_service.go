@@ -216,6 +216,6 @@ func (service *ArticleService) GetLocalContent(articleId, chapterId int) (string
 
 func (service *ArticleService) ChapterNameExists(articleId int, chapterName string) bool {
 	var chapter model.JieqiChapter
-	service.db.Where("id = ? and chaptername = ?", articleId, chapterName).Find(&chapter)
+	service.db.Where("articleid = ? and chaptername = ?", articleId, chapterName).Find(&chapter)
 	return chapter.Chapterid != 0
 }
