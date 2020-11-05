@@ -214,6 +214,11 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	if match && len(newChapters) == 0 {
 		log.Infof("process %s, new chapters none, info: name:%s, author:%s, last:%s", obj.Url, article.ArticleName, article.Author, article.LastChapter)
 		if obj.NewChapterName != "" && obj.NewChapterName != allChapters[len(allChapters)-1].ChapterName {
+			for i := len(allChapters) - 1; i <= 0; i-- {
+				if allChapters[i].ChapterName == obj.NewChapterName {
+					return
+				}
+			}
 			log.Infof("process %s need retry, new: %s, old:%s", obj.Url, obj.NewChapterName, allChapters[len(allChapters)-1].ChapterName)
 			s.retry(s.wsInfo.Host, obj.Url, obj.NewChapterName)
 		}
