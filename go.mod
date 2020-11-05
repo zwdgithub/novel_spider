@@ -20,4 +20,5 @@ require (
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 	gopkg.in/yaml.v2 v2.3.0
 	github.com/antlabs/strsim v0.0.1
+	github.com/gin-gonic/gin v1.6.3
 )
