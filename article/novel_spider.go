@@ -204,7 +204,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 
 	if !match {
-		for i := len(allChapters) - 1; i <= 0; i-- { // 从后向前匹配章节名
+		for i := len(allChapters) - 1; i >= 0; i-- { // 从后向前匹配章节名
 			if allChapters[i].ChapterName == local.Lastchapter {
 				match = true
 				for j := i + 1; j < len(allChapters); j++ {
