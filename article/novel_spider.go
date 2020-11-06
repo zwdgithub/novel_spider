@@ -240,6 +240,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 					localCache = make([]string, 0)
 					goto matchLabel
 				}
+				continue
 			}
 			localCache = append(localCache, content)
 		}
