@@ -197,17 +197,21 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	newChapters := make([]NewChapter, 0)
 	match := false
 	local.Lastchapter = util.Trim(local.Lastchapter)
-	if local.Chapters == 0 {
+
+	if local.Chapters == 0 { // 新书
 		match = true
+		newChapters = allChapters
 	}
-	for _, item := range allChapters {
-		//log.Infof(">%s, %s<", item.ChapterName, local.Lastchapter)
-		if item.ChapterName == local.Lastchapter {
-			match = true
-			continue
-		}
-		if match {
-			newChapters = append(newChapters, item)
+
+	if !match {
+		for i := len(allChapters) - 1; i <= 0; i-- { // 从后向前匹配章节名
+			if allChapters[i].ChapterName == local.Lastchapter {
+				match = true
+				for j := i + 1; j < len(allChapters); j++ {
+					newChapters = append(newChapters, allChapters[j])
+				}
+				break
+			}
 		}
 	}
 
