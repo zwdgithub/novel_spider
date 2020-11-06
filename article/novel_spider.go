@@ -254,7 +254,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			content = strings.ReplaceAll(content, "\n", "")
 			for _, c := range localCache {
 				score := strsim.Compare(content, c, strsim.DiceCoefficient())
-				if score >= 0.75 && len(content) > 500 {
+				if score >= 0.75 {
 					match = true
 					for j := i + 1; j < len(allChapters); j++ {
 						newChapters = append(newChapters, allChapters[j])
