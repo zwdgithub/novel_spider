@@ -166,3 +166,10 @@ func CoverContent(content string) string {
 	content = strings.ReplaceAll(content, "\x1A", "  ")
 	return content
 }
+
+func Reverse() {
+	var list []int
+	for i, j := 0, len(list)-1; i < j; i, j = i+1, j-1 {
+		list[i], list[j] = list[j], list[i]
+	}
+}

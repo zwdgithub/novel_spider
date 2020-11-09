@@ -111,13 +111,19 @@ func (n *XsbiqugeCom) NewList() ([]string, error) {
 	r := make([]string, 0)
 	content, err := util.Get(n.NewChapterListUrl, n.Encoding, n.Headers)
 	if err != nil {
+		log.Infof("new list get content error %v", err)
 		return r, err
 	}
 	doc, err := htmlquery.Parse(strings.NewReader(content))
 	if err != nil {
+		log.Infof("new list parse content error %v", err)
 		return r, err
 	}
 	liList := htmlquery.Find(doc, `//div[@id="newscontent"]/div[1]/ul/li`)
+	log.Infof("lilist len is %d", len(liList))
+	if len(liList) == 0 {
+		log.Infof(content)
+	}
 	for _, item := range liList {
 		articleInfo := htmlquery.Find(item, `./span[@class="s2"]/a`)
 		newChapter := htmlquery.Find(item, `./span[@class="s3"]/a`)
