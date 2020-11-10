@@ -257,6 +257,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			}
 			content = strings.ReplaceAll(content, "\r", "")
 			content = strings.ReplaceAll(content, "\n", "")
+			if len(content) < 500 {
+				goto matchLabel
+			}
 			for _, c := range localCache {
 				score := strsim.Compare(content, c, strsim.DiceCoefficient())
 				if score >= 0.75 {
