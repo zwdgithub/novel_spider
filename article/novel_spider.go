@@ -262,6 +262,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			}
 			for _, c := range localCache {
 				score := strsim.Compare(content, c, strsim.DiceCoefficient())
+				log.Infof("process %s, try to match c: %s, c2:%s", obj.Url, c, content)
 				if score >= 0.75 {
 					match = true
 					for j := i + 1; j < len(allChapters); j++ {
