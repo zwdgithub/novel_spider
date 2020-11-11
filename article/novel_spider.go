@@ -228,7 +228,7 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 	if !match {
 		log.Infof("process %s, try to match last chapter", obj.Url)
-		num := 1
+		num := 5
 		lastList := s.service.LastChapterList(local.Articleid, num)
 		localCache := make([]string, 0)
 		for _, v := range lastList {
