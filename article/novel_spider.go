@@ -423,15 +423,18 @@ func (s *NovelSpider) Repair() {
 			}
 
 			if len(content) <= s.wsInfo.ShortContent {
-				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0)
+				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
 				continue
 			}
 			err = s.service.PutContent(item.ArticleId, item.ChapterId, content)
 			if err != nil {
-				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0)
+				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
 				continue
 			}
-			s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1)
+			s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1, model.JieqiChapter{
+				Chapterid: item.ChapterId,
+				Size:      len(content),
+			})
 			s.service.RepairSyncSameAll(item.ArticleId)
 			log.Infof("repair success %s", item.Url)
 		}

@@ -115,13 +115,17 @@ func (service *ArticleService) NeedRepairChapterList(host string, args ...interf
 	return list
 }
 
-func (service *ArticleService) UpdateErrorChapter(id, retry, repair int) {
-
+func (service *ArticleService) UpdateErrorChapter(id, retry, repair int, chapter model.JieqiChapter) {
 	service.db.Model(model.ChapterErrorLog{}).Where("id = ? and repair = 0", id).Update(map[string]interface{}{
 		"retry_num":   retry,
 		"repair":      repair,
 		"update_time": time.Now().Format("2006-01-02 15:04:05"),
 	})
+	if repair == 1 {
+		service.db.Model(&model.JieqiChapter{}).Where("chapterid = ?", chapter.Chapterid).Updates(map[string]interface{}{
+			"size": chapter.Size,
+		})
+	}
 }
 
 func (service *ArticleService) PutContent(aid, cid int, content string) error {
