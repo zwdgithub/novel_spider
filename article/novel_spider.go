@@ -241,6 +241,9 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 			}
 			if len(content) < 500 {
 				if util.ValidChapterName(v.Chaptername) {
+					if len(localCache) > 0 {
+						break
+					}
 					log.Infof("process %s,try to match last chapter, content length < 500, invalid chapter name is: %s", obj.Url, v.Chaptername)
 					localCache = make([]string, 0)
 					goto matchLabel
