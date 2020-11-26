@@ -484,6 +484,7 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 	num := 10
 	lastList := s.service.LastChapterList(local.Articleid, num)
 	count := s.service.ChapterCount(local.Articleid)
+	log.Infof("process %s, tryFindNewChapter lastList len is: %d", obj.Url, len(lastList))
 
 	for _, v := range lastList {
 		content, err := s.service.GetLocalContent(v.Articleid, v.Chapterid)
@@ -534,5 +535,6 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 
 	}
 
+	log.Infof("process %s, tryFindNewChapter lastList end", obj.Url)
 	return 0, errors.New("")
 }
