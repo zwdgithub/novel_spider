@@ -420,27 +420,7 @@ func (s *NovelSpider) Repair() {
 		list := s.service.NeedRepairChapterList(s.wsInfo.Host, offset)
 		log.Infof("repair, need repair list len is %d", len(list))
 		for _, item := range list {
-			content, err := s.ws.ChapterContent(item.Url)
-			if err != nil {
-				log.Infof("repair %s, get content error: %v", item.Url, err)
-				continue
-			}
-
-			if len(content) <= s.wsInfo.ShortContent {
-				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
-				continue
-			}
-			err = s.service.PutContent(item.ArticleId, item.ChapterId, content)
-			if err != nil {
-				s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
-				continue
-			}
-			s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1, model.JieqiChapter{
-				Chapterid: item.ChapterId,
-				Size:      len(content),
-			})
-			s.service.RepairSyncSameAll(item.ArticleId)
-			log.Infof("repair success %s", item.Url)
+			s.RepairSingle(item)
 		}
 		if len(list) == 100 {
 			offset += 100
@@ -450,6 +430,37 @@ func (s *NovelSpider) Repair() {
 		}
 		time.Sleep(time.Minute * 10)
 	}
+}
+
+func (s *NovelSpider) RepairItem(id int) {
+	item := s.service.ErrorChapter(id)
+	if item.Id == 0 {
+		return
+	}
+	s.RepairSingle(item)
+}
+
+func (s *NovelSpider) RepairSingle(item model.ChapterErrorLog) {
+	content, err := s.ws.ChapterContent(item.Url)
+	if err != nil {
+		log.Infof("repair %s, get content error: %v", item.Url, err)
+		return
+	}
+
+	if len(content) <= s.wsInfo.ShortContent {
+		s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
+	}
+	err = s.service.PutContent(item.ArticleId, item.ChapterId, content)
+	if err != nil {
+		s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
+		return
+	}
+	s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1, model.JieqiChapter{
+		Chapterid: item.ChapterId,
+		Size:      len(content),
+	})
+	s.service.RepairSyncSameAll(item.ArticleId)
+	log.Infof("repair success %s", item.Url)
 }
 
 func (s *NovelSpider) Retry() {
@@ -519,6 +530,7 @@ func (s *NovelSpider) tryFindNewChapter(obj NewArticle, allChapter []NewChapter,
 				}
 			}
 			score := strsim.Compare(c1Temp, c2, strsim.DiceCoefficient())
+			log.Infof("process %s, tryFindNewChapter get content error: %v", obj.Url, err)
 			if score > 0.65 && math.Abs(float64(count-i)) <= 100 {
 				log.Infof("process %s, try to match all chapter, c1: %s, c2: %s, score: %v", obj.Url, c1, c2, score)
 				newContent, err := s.ws.ChapterContent(chapter.Url)

@@ -7,23 +7,29 @@
     <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/4.5.3/css/bootstrap-grid.min.css" rel="stylesheet">
 </head>
 <body>
-<table class="table table-striped">
-    {{range .list}}
-        <tr>
-            <td>{{.ArticleName}}</td>
-            <td>
-                {{.LocalLastChapter}}<br/>
-                {{.NewLastChapter}}<br/>
-                <a class="delete" data-id="{{.Id}}" style="cursor:pointer">删除</a>
-            </td>
-            <td>
-                <a href="{{.Url}}">{{.Url}}</a>
-            </td>
-        </tr>
-    {{end}}
-</table>
+<div class="container">
+    <table class="table table-hover">
+        {{range .list}}
+            <tr>
+                <td>{{.ArticleName}}</td>
+                <td>
+                    {{.LocalLastChapter}}<br/>
+                    {{.NewLastChapter}}<br/>
+                </td>
+                <td>
+                    <a href="{{.Url}}">{{.Url}}</a>
+                </td>
+                <td style="width: 20%">
+                    <button type="button" class="btn btn-primary op" data-id="{{.Id}}">操作</button>
+                    <button type="button" class="btn btn-danger delete" data-id="{{.Id}}" style="cursor:pointer">删除
+                    </button>
+                </td>
+            </tr>
+        {{end}}
+    </table>
+</div>
 <script>
-    $(".delete").click(function () {
+    $(" .delete").click(function () {
         ele = $(this)
         $.get("/delete/" + ele.attr("data-id"), function (data, status) {
             if (data.code == 1) {
@@ -31,6 +37,11 @@
             }
         })
     })
+    $('.op').click(function (){
+        ele = $(this)
+        window.open('/load/'+ ele.attr("data-id"))
+    })
 </script>
-</body>
-</html>
+<
+/body>
+< /html>

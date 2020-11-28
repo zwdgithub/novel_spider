@@ -13,11 +13,17 @@ func (service *ArticleService) SaveNotMachLog(log *model.NovelNotMatchLog) {
 	service.db.Save(log)
 }
 
-func (service *ArticleService) LoadNotMatchLog() []*model.NovelNotMatchLog {
+func (service *ArticleService) LoadNotMatchLogList() []*model.NovelNotMatchLog {
 	var list []*model.NovelNotMatchLog
 	fmt.Println(service.db.Find(&list).Error)
 	fmt.Println(len(list))
 	return list
+}
+
+func (service *ArticleService) LoadNotMatchLog(id int) *model.NovelNotMatchLog {
+	var notMatchLog model.NovelNotMatchLog
+	service.db.Where("id = ?", id).Find(&notMatchLog)
+	return &notMatchLog
 }
 
 func (service *ArticleService) DeleteNotMatchLog(id int) {

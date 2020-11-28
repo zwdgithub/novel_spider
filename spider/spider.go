@@ -12,8 +12,12 @@ import (
 )
 
 func main() {
-	var w = flag.String("website", "CreateBiqugeBizSpider", "website reflect")
-	var u = flag.String("url", "", "website reflect")
+	var (
+		w = flag.String("website", "CreateBiqugeBizSpider", "website reflect")
+		u = flag.String("url", "", "website reflect")
+		m = flag.String("m", "", "website reflect")
+		r = flag.Int("repair", 0, "website reflect")
+	)
 	flag.Parse()
 	log.Infof("website: %s", *w)
 	dbConf := db.LoadMysqlConfig("config/conf.yaml")
@@ -31,6 +35,12 @@ func main() {
 		return
 	}
 	spider := callResult[0].Interface().(*article.NovelSpider)
+
+	switch *m {
+	case "repair":
+		spider.RepairItem(*r)
+		return
+	}
 	if *u != "" {
 		c := make(chan int, 1)
 		c <- 1

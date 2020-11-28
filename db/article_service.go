@@ -96,6 +96,17 @@ func (service *ArticleService) LocalArticleInfo(articleName, author string) (*mo
 
 }
 
+func (service *ArticleService) LoadArticleInfoById(id int) (*model.JieqiArticle, error) {
+	var info model.JieqiArticle
+	err := service.db.
+		Where("articleid = ?", id).Find(&info).Error
+	if err != nil && err.Error() == "record not found" {
+		err = nil
+	}
+	return &info, err
+
+}
+
 func (service *ArticleService) AddErrorChapter(log model.ChapterErrorLog) {
 	log.CreateTime = time.Now().Format("2006-01-02 15:04:05")
 	log.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
@@ -113,6 +124,12 @@ func (service *ArticleService) NeedRepairChapterList(host string, args ...interf
 		service.db.Where("`host` = ? and retry_num < 10 and create_time > ? and repair = 0", host, n).Order("create_time").Limit("100").Find(&list)
 	}
 	return list
+}
+
+func (service *ArticleService) ErrorChapter(id int) model.ChapterErrorLog {
+	var item model.ChapterErrorLog
+	service.db.Where("id = ?", id).Find(&item)
+	return item
 }
 
 func (service *ArticleService) UpdateErrorChapter(id, retry, repair int, chapter model.JieqiChapter) {
@@ -195,6 +212,12 @@ func (service *ArticleService) LoadShortChapter(articleId int, host string) []*m
 func (service *ArticleService) LastChapterList(articleId int, num int) []*model.JieqiChapter {
 	var list []*model.JieqiChapter
 	service.db.Where("articleid = ?", articleId).Order("chapterorder desc, chapterid desc").Limit(num).Find(&list)
+	return list
+}
+
+func (service *ArticleService) AllChapterList(articleId int) []*model.JieqiChapter {
+	var list []*model.JieqiChapter
+	service.db.Where("articleid = ?", articleId).Order("chapterorder, chapterid").Find(&list)
 	return list
 }
 
