@@ -26,6 +26,10 @@ func (service *ArticleService) LoadNotMatchLog(id int) *model.NovelNotMatchLog {
 	return &notMatchLog
 }
 
+func (service *ArticleService) DeleteNotMatchLogByArticleId(id int) {
+	service.db.Unscoped().Where("local_article_id = ?", id).Delete(&model.NovelNotMatchLog{})
+}
+
 func (service *ArticleService) DeleteNotMatchLog(id int) {
 	service.db.Unscoped().Where("id = ?", id).Delete(&model.NovelNotMatchLog{})
 }

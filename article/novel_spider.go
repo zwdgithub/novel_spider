@@ -347,6 +347,7 @@ matchLabel:
 	defer func() {
 		if addChapterNum > 0 {
 			s.service.GenOpf(local.Articleid)
+			s.service.DeleteNotMatchLogByArticleId(local.Articleid)
 		}
 	}()
 	matched := false
