@@ -204,13 +204,8 @@ func (s *NovelSpider) Process(obj NewArticle, c chan int) {
 	}
 
 	if !match {
-		lastSecond := ""
-		lastList := s.service.LastChapterList(local.Articleid, 2)
-		if len(lastList) > 1 {
-			lastSecond = lastList[1].Chaptername
-		}
 		for i := len(allChapters) - 1; i >= 0; i-- { // 从后向前匹配章节名
-			if allChapters[i].ChapterName == local.Lastchapter || (lastSecond != "" && allChapters[i].ChapterName == lastSecond) {
+			if allChapters[i].ChapterName == local.Lastchapter {
 				match = true
 				for j := i + 1; j < len(allChapters); j++ {
 					newChapters = append(newChapters, allChapters[j])
