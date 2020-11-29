@@ -450,6 +450,7 @@ func (s *NovelSpider) RepairSingle(item model.ChapterErrorLog) {
 
 	if len(content) <= s.wsInfo.ShortContent {
 		s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
+		return
 	}
 	err = s.service.PutContent(item.ArticleId, item.ChapterId, content)
 	if err != nil {
