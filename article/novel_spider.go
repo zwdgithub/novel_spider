@@ -421,7 +421,25 @@ func (s *NovelSpider) Repair() {
 		list := s.service.NeedRepairChapterList(s.wsInfo.Host, offset)
 		log.Infof("repair, need repair list len is %d", len(list))
 		for _, item := range list {
-			s.RepairSingle(item)
+			s.RepairSingle(item, 1)
+		}
+		if len(list) == 100 {
+			offset += 100
+			continue
+		} else {
+			offset = 0
+		}
+		time.Sleep(time.Minute * 10)
+	}
+}
+
+func (s *NovelSpider) RepairQuick() {
+	offset := 0
+	for {
+		list := s.service.NeedRepairChapterListQuick(s.wsInfo.Host, offset)
+		log.Infof("repair, need repair list len is %d", len(list))
+		for _, item := range list {
+			s.RepairSingle(item, 0)
 		}
 		if len(list) == 100 {
 			offset += 100
@@ -438,10 +456,10 @@ func (s *NovelSpider) RepairItem(id int) {
 	if item.Id == 0 {
 		return
 	}
-	s.RepairSingle(item)
+	s.RepairSingle(item, 0)
 }
 
-func (s *NovelSpider) RepairSingle(item model.ChapterErrorLog) {
+func (s *NovelSpider) RepairSingle(item model.ChapterErrorLog, updateRetry int) {
 	content, err := s.ws.ChapterContent(item.Url)
 	if err != nil {
 		log.Infof("repair %s, get content error: %v", item.Url, err)
@@ -449,12 +467,12 @@ func (s *NovelSpider) RepairSingle(item model.ChapterErrorLog) {
 	}
 
 	if len(content) <= s.wsInfo.ShortContent {
-		s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
+		s.service.UpdateErrorChapter(item.Id, item.RetryNum+updateRetry, 0, model.JieqiChapter{})
 		return
 	}
 	err = s.service.PutContent(item.ArticleId, item.ChapterId, content)
 	if err != nil {
-		s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 0, model.JieqiChapter{})
+		s.service.UpdateErrorChapter(item.Id, item.RetryNum+updateRetry, 0, model.JieqiChapter{})
 		return
 	}
 	s.service.UpdateErrorChapter(item.Id, item.RetryNum+1, 1, model.JieqiChapter{

@@ -126,6 +126,19 @@ func (service *ArticleService) NeedRepairChapterList(host string, args ...interf
 	return list
 }
 
+func (service *ArticleService) NeedRepairChapterListQuick(host string, args ...interface{}) []model.ChapterErrorLog {
+	var list []model.ChapterErrorLog
+	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
+	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
+	if len(args) > 0 {
+		log.Infof("repair chapter list offset: %d", args[0])
+		service.db.Where("`host` = ?  and repair = 0", host, n).Order("create_time desc").Limit("100").Offset(args[0]).Find(&list)
+	} else {
+		service.db.Where("`host` = ?  and repair = 0", host, n).Order("create_time desc").Limit("100").Find(&list)
+	}
+	return list
+}
+
 func (service *ArticleService) ErrorChapter(id int) model.ChapterErrorLog {
 	var item model.ChapterErrorLog
 	service.db.Where("id = ?", id).Find(&item)
@@ -245,4 +258,10 @@ func (service *ArticleService) ChapterNameExists(articleId int, chapterName stri
 	var chapter model.JieqiChapter
 	service.db.Where("articleid = ? and chaptername = ?", articleId, chapterName).Find(&chapter)
 	return chapter.Chapterid != 0
+}
+
+func (service *ArticleService) SetLastChapter(articleId int, lastChapter string) {
+	service.db.Model(model.JieqiArticle{}).Where("articleid = ?", articleId).Updates(map[string]interface{}{
+		"lastchapter": lastChapter,
+	})
 }

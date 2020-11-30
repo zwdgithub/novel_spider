@@ -15,7 +15,7 @@ func (service *ArticleService) SaveNotMachLog(log *model.NovelNotMatchLog) {
 
 func (service *ArticleService) LoadNotMatchLogList() []*model.NovelNotMatchLog {
 	var list []*model.NovelNotMatchLog
-	fmt.Println(service.db.Find(&list).Error)
+	fmt.Println(service.db.Order("host").Find(&list).Error)
 	fmt.Println(len(list))
 	return list
 }
