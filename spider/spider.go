@@ -52,6 +52,7 @@ func main() {
 		return
 	}
 	go spider.Repair()
+	go spider.RepairQuick()
 	go spider.Consumer(true)
 	go spider.Retry()
 	spider.Consumer(false)

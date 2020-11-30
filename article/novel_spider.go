@@ -441,13 +441,13 @@ func (s *NovelSpider) RepairQuick() {
 		for _, item := range list {
 			s.RepairSingle(item, 0)
 		}
-		if len(list) == 100 {
+		if len(list) == 100 && offset < 100*100 {
 			offset += 100
 			continue
 		} else {
 			offset = 0
 		}
-		time.Sleep(time.Minute * 10)
+		// time.Sleep(time.Minute * 2)
 	}
 }
 
