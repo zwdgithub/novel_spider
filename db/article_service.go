@@ -128,13 +128,11 @@ func (service *ArticleService) NeedRepairChapterList(host string, args ...interf
 
 func (service *ArticleService) NeedRepairChapterListQuick(host string, args ...interface{}) []model.ChapterErrorLog {
 	var list []model.ChapterErrorLog
-	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
-	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
 	if len(args) > 0 {
 		log.Infof("repair chapter list offset: %d", args[0])
-		service.db.Where("`host` = ?  and repair = 0", host, n).Order("create_time desc").Limit("100").Offset(args[0]).Find(&list)
+		service.db.Where("`host` = ?  and repair = 0", host).Order("create_time desc").Limit("100").Offset(args[0]).Find(&list)
 	} else {
-		service.db.Where("`host` = ?  and repair = 0", host, n).Order("create_time desc").Limit("100").Find(&list)
+		service.db.Where("`host` = ?  and repair = 0", host).Order("create_time desc").Limit("100").Find(&list)
 	}
 	return list
 }
