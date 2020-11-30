@@ -447,7 +447,9 @@ func (s *NovelSpider) RepairQuick() {
 		} else {
 			offset = 0
 		}
-		// time.Sleep(time.Minute * 2)
+		if offset <= 100 {
+			time.Sleep(time.Minute * 2)
+		}
 	}
 }
 
