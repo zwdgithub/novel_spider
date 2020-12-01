@@ -441,7 +441,7 @@ func (s *NovelSpider) RepairQuick() {
 		for _, item := range list {
 			s.RepairSingle(item, 0)
 		}
-		if len(list) == 100 && offset < 100*100 {
+		if len(list) == 100 && offset < 100*20 {
 			offset += 100
 			continue
 		} else {
