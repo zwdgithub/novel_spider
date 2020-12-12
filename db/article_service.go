@@ -85,6 +85,17 @@ func (service *ArticleService) AddChapter(chapter *model.JieqiChapter, content s
 	return chapter, err
 }
 
+/**
+更新 chapter
+*/
+func (service *ArticleService) UpdateChapter(chapter *model.JieqiChapter, content string) {
+	service.db.Model(model.JieqiChapter{}).Where("chapterid = ?", chapter.Chapterid).
+		Updates(map[string]interface{}{
+			"size": len(content),
+		})
+	_ = service.bos.PutChapter(chapter.Articleid, chapter.Chapterid, content)
+}
+
 func (service *ArticleService) LocalArticleInfo(articleName, author string) (*model.JieqiArticle, error) {
 	var info model.JieqiArticle
 	err := service.db.Select("articleid, articlename, author, lastchapter, chapters").

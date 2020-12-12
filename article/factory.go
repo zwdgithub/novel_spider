@@ -17,13 +17,17 @@ func init() {
 	methods["CreateSevenKZWComSpider"] = CreateSevenKZWComSpider
 	methods["CreateAikantxtLaSpider"] = CreateAikantxtLaSpider
 	methods["CreateXhxswzComSpider"] = CreateXhxswzComSpider
+	methods["CreateBiqumoComSpider"] = CreateBiqumoComSpider
 
 	methods["biquge.biz"] = CreateBiqugeBizSpider
 	methods["xsbiquge.com"] = CreateXsbiqugeComSpider
+	methods["zxbiquge.com"] = CreateXsbiqugeComSpider
 	methods["kanshu.la"] = CreateKanshuLaSpider
 	methods["aikantxt.la"] = CreateAikantxtLaSpider
 	methods["7kzw.com"] = CreateSevenKZWComSpider
 	methods["xhxswz.com"] = CreateXhxswzComSpider
+	methods["biqumo.com"] = CreateBiqumoComSpider
+
 }
 
 func CreateBiqugeBizSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
@@ -53,6 +57,11 @@ func CreateAikantxtLaSpider(service *db.ArticleService, redisConn *redis.RedisUt
 
 func CreateXhxswzComSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
 	website := NewXhxswzCom(service, redisConn, bosClient)
+	return NewNovelSpider(website, website.NovelWebsite, service, redisConn)
+}
+
+func CreateBiqumoComSpider(service *db.ArticleService, redisConn *redis.RedisUtil, bosClient *bos_utils.BosUtil) *NovelSpider {
+	website := NewBiqumoCom(service, redisConn, bosClient)
 	return NewNovelSpider(website, website.NovelWebsite, service, redisConn)
 }
 
