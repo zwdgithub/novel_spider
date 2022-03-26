@@ -14,9 +14,10 @@
                 max-width: 1500px;
             }
 
-            td {
-                height: 50px;
-                overflow: hidden;
+            td{
+                white-space:nowrap;
+                overflow:hidden;
+                word-break:keep-all;
             }
         }
     </style>
@@ -26,20 +27,26 @@
     <div>
         <input type="hidden" id="host" value="{{.notMatchLog.Host}}">
         <input type="hidden" id="url" value="{{.notMatchLog.Url}}">
+        <input type="hidden" id="articleId" value="{{.info.Articleid}}">
         <table class="table table-hover">
             <thead>
             <td>id</td>
             <td>小说</td>
             <td>作者</td>
             <td>最新更新</td>
-            <td>更新时间</td>
+            <td>url</td>
+            <td>ihxs</td>
             </thead>
             <tr>
                 <td><span>{{.info.Articleid}}</span></td>
                 <td><span>{{.info.Articlename}}</span></td>
                 <td><span>{{.info.Author}}</span></td>
                 <td><span>{{.info.Lastchapter}}</span></td>
-                <td><span>{{.info.Lastupdate}}</span></td>
+                <td><a target="_blank" href="{{.notMatchLog.Url}}">{{.notMatchLog.Url}}</a></td>
+                <td><a target="_blank" href="{{.notMatchLog.LocalArticleId | formatUrl}}">{{.notMatchLog.LocalArticleId | formatUrl}}</a></td>
+            </tr>
+            <tr>
+                <td>./ss -website={{.host}} -url={{.notMatchLog.Url}}</td>
             </tr>
         </table>
     </div>
@@ -55,6 +62,7 @@
                 {{range .chapterList}}
                     <tr>
                         <td><input type="checkbox"/></td>
+                        <td>{{.Chapterid}}</td>
                         <td>{{.Chaptername}}</td>
                         <td>{{.Size}}</td>
                         <td style="width: 30%">
@@ -79,14 +87,25 @@
         })
     })
     $(document).ready(function () {
+        id = $('#articleId').val()
         $.contextMenu({
-            selector: 'tr',
+            selector: 'td',
             callback: function(key, options) {
+                switch (key){
+                    case "setLastChapter":
+                        l = encodeURI($(this).text());
+                        $.get("/set-last-chapter?id=" + id + "&lastChapter=" + l, function (data, status){
+                            if (data.code == 1){
+                                alert('success')
+                            }
+                        })
+                        return
+                }
                 var m = "clicked: " + key;
                 window.console && console.log(m) || alert(m);
             },
             items: {
-                "edit": {name: "Edit", icon: "edit"},
+                "setLastChapter": {name: "设置为最新章节", icon: "edit"},
                 "cut": {name: "Cut", icon: "cut"},
                 copy: {name: "Copy", icon: "copy"},
                 "paste": {name: "Paste", icon: "paste"},
@@ -101,8 +120,8 @@
         $('.context-menu-one').on('click', function(e){
             console.log('clicked', this);
         })
-        host = $("#host").val(),
-            url = $("#url").val()
+        host = $("#host").val();
+        url = $("#url").val()
         $.get("/chapter-list?host=" + host + "&url=" + url, function (data) {
             if (data.code != 1) {
                 alert("")

@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"github.com/antchfx/htmlquery"
+	"github.com/antlabs/strsim"
 	"novel_spider/article"
 	"novel_spider/bos_utils"
 	"novel_spider/db"
@@ -11,6 +12,7 @@ import (
 	"novel_spider/redis"
 	"novel_spider/util"
 	"regexp"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -26,15 +28,16 @@ func TestProcess(t *testing.T) {
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
-	spider := article.CreateBiqugeBizSpider(service, redisConn, bosClient)
+	spider := article.CreateXsbiqugeComSpider(service, redisConn, bosClient)
 	spider.Process(article.NewArticle{
-		Url:            "https://www.biquge.biz/34_34415/",
-		NewChapterName: "第五百一十四章 不寒而栗",
+		Url:            "https://www.xsbiquge.com/93_93314/",
+		NewChapterName: "",
 	}, c)
 
 }
 
 func TestLog(t *testing.T) {
+
 }
 
 func TestReg(t *testing.T) {
@@ -214,7 +217,9 @@ func TestDate(t *testing.T) {
 	a, _ := time.ParseDuration(fmt.Sprintf("-%dh", 24*7))
 	n := time.Now().Add(a).Format("2006-01-02 15:04:05")
 	fmt.Println(n)
-	t.Log(util.ValidChapterName("123"))
+	t.Log(util.ValidChapterName("刚到家，晚点更新"))
+	t.Log(fmt.Sprintf("jj %.2f", 0.5555))
+	time.After(time.Second * 3)
 }
 
 func TestKanshuSpider(t *testing.T) {
@@ -278,12 +283,185 @@ func TestXhxswzComSpider(t *testing.T) {
 	dbConn := db.New(dbConf)
 	redisConn := redis.NewRedis()
 	service := db.NewArticleService(dbConn, redisConn, bosClient)
-	spider := article.CreateXhxswzComSpider(service, redisConn, bosClient)
+	spider := article.CreateBiqumoComSpider(service, redisConn, bosClient)
+	spider.NewList()
 	c := make(chan int, 1)
 	c <- 1
 	spider.Process(article.NewArticle{
-		Url:            "http://www.xhxswz.com/go/17940/",
+		Url:            "https://www.biqumo.com/3_3053/",
 		NewChapterName: "",
 		MaxChapterNum:  10000,
 	}, c)
+}
+
+func TestUpdateArticle(t *testing.T) {
+	dbConf := db.LoadMysqlConfig("config/conf.yaml")
+	bosClient := bos_utils.NewBosClient("config/bos_conf.yaml")
+	dbConn := db.New(dbConf)
+	redisConn := redis.NewRedis()
+	service := db.NewArticleService(dbConn, redisConn, bosClient)
+	a := &model.JieqiArticle{
+		Articleid: 17575,
+	}
+	//service.UpdateArticleOnAddChapter(a, 100)
+	t.Log(service, a)
+	//redisConn.Retry("tt", "{abc}")
+	t.Log(redisConn.GetRetryArticle("tt"))
+
+}
+
+func TestSlice(t *testing.T) {
+
+	l := []int{1, 2, 3, 4, 5}
+	t.Log(l)
+	f := l[1:2]
+	t.Log(f, l)
+	f[0] = 9
+	t.Log(f, l)
+}
+
+func TestStrSame(t *testing.T) {
+	//https://m.ihxs.la/102_102035/45893229.html
+	//https://m.ihxs.la/109_109022/47363115.html
+	s1 := "第1338章  外部变化"
+	s2 := "第1358章  外部变化"
+	splitFlag := false
+	if strings.Contains(s1, " ") {
+		splits := strings.Split(s1, " ")
+		s1 = strings.Join(splits[1:], "")
+		splitFlag = true
+	}
+	if splitFlag {
+		if strings.Contains(s2, " ") {
+			splits := strings.Split(s2, " ")
+			s2 = strings.Join(splits[1:], "")
+		} else {
+			s1 = "第1338章  外部变化"
+		}
+	}
+	t.Log(strsim.Compare(s1, s2))
+	t.Log(strsim.Compare(s1, s2, strsim.DiceCoefficient()))
+	t.Log(strsim.Compare(s1, s2, strsim.Jaro()))
+	t.Log(strsim.Compare(s1, s2, strsim.Hamming()))
+	t.Log([]byte("1123"))
+	strconv.Atoi("12")
+	strconv.Itoa(1)
+	fmt.Sprintf("%d", 111)
+}
+
+func TTNum() []int {
+	var l = make([]int, 1)
+	defer func() {
+		l[0] = 1
+	}()
+	l[0] = 5
+	return l
+}
+
+func TestLabel(t *testing.T) {
+	newChapters := []int{1, 2, 3, 4, 5, 6, 7}
+	t.Log(newChapters)
+	for i, j := 0, len(newChapters)-1; i < j; i, j = i+1, j-1 {
+		newChapters[i], newChapters[j] = newChapters[j], newChapters[i]
+	}
+	t.Log(newChapters)
+}
+
+func lengthOfLongestSubstring(s string) int {
+	if len(s) == 0 {
+		return 0
+	}
+	r := 0
+	temp := ""
+	for i := 0; i < len(s); i++ {
+		temp = ""
+		for j := i; j < len(s); j++ {
+			if inStr(s[j:j+1], temp) {
+				if len(temp) > r {
+					r = len(temp)
+				}
+				break
+			}
+			temp += s[j : j+1]
+			if j == len(s)-1 && len(temp) > r {
+				r = len(temp)
+			}
+		}
+	}
+	return r
+}
+
+func inStr(s, str string) bool {
+	for i := 0; i < len(str); i++ {
+		if str[i:i+1] == s {
+			return true
+		}
+	}
+	return false
+}
+
+func TestStrs(t *testing.T) {
+	a := []int{1, 2, 3}
+	s := make([]int, 10)
+	t.Log(a)
+	t.Log(s)
+	copy(s, a)
+	t.Log(a)
+	t.Log(s)
+	s[0] = 2
+	t.Log(a)
+	t.Log(s)
+}
+
+func BinarySearch(nums []int, target int) int {
+	left, right := 0, len(nums)-1
+	for left <= right {
+		mid := (left + right) / 2
+		if nums[mid] == target {
+			return mid
+		} else if nums[mid] < target {
+			left += 1
+		} else if nums[mid] > right {
+			right -= 1
+		}
+	}
+	return -1
+}
+
+func TestDef(t *testing.T) {
+	ticker := time.NewTicker(time.Second * 2)
+	for {
+		<-ticker.C
+		Sleep()
+	}
+}
+
+func Sleep() {
+	fmt.Println("sleep")
+	time.Sleep(time.Second * 10)
+}
+
+func Sleep10( ret  chan int) {
+	time.Sleep(time.Second * 10)
+	ret <- 10
+}
+
+func TestGo(t *testing.T) {
+	ret := make(chan int)
+	go Sleep10(ret)
+
+	time.AfterFunc(time.Second * 10, func() {
+		time.Sleep(5)
+		t.Logf("func finish")
+	})
+
+	for {
+		v := <- ret
+		t.Logf("ret: %v", v)
+	}
+
+
+
+
+
 }

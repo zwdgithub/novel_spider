@@ -1,6 +1,6 @@
-addr: localhost
+addr: 154.85.54.4
 dbname: book
-port: 3306
-user: root
-pass: root
+port: 5506
+user: book
+pass: 1z1z1Z!@
 encoding: utf8
